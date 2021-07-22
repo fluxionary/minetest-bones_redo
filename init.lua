@@ -7,7 +7,7 @@
 local S = minetest.get_translator("bones")
 
 bones = {}
-
+core.log("action","my bones")
 local function is_owner(pos, name)
 	local owner = minetest.get_meta(pos):get_string("owner")
 	if owner == "" or owner == name or minetest.check_player_privs(name, "protection_bypass") then
@@ -17,13 +17,13 @@ local function is_owner(pos, name)
 end
 
 local bones_formspec =
-	"size[8,9]" ..
-	"list[current_name;main;0,0.3;8,4;]" ..
-	"list[current_player;main;0,4.85;8,1;]" ..
-	"list[current_player;main;0,6.08;8,3;8]" ..
+	"size[8,10.5]" ..
+	"list[current_name;main;0,0.3;8,6;]" ..
+	"list[current_player;main;0,6.45;8,1;]" ..
+	"list[current_player;main;0,7.58;8,3;8]" ..
 	"listring[current_name;main]" ..
 	"listring[current_player;main]" ..
-	default.get_hotbar_bg(0,4.85)
+	default.get_hotbar_bg(0,6.45)
 
 local share_bones_time = tonumber(minetest.settings:get("share_bones_time")) or 1200
 local share_bones_time_early = tonumber(minetest.settings:get("share_bones_time_early")) or share_bones_time / 4
@@ -86,7 +86,7 @@ minetest.register_node("bones:bones", {
 		if not is_owner(pos, player:get_player_name()) then
 			return
 		end
-
+		core.log("action","punch bones")
 		if minetest.get_meta(pos):get_string("infotext") == "" then
 			return
 		end
@@ -258,7 +258,7 @@ minetest.register_on_dieplayer(function(player)
 
 	local meta = minetest.get_meta(pos)
 	local inv = meta:get_inventory()
-	inv:set_size("main", 8 * 4)
+	inv:set_size("main", 8 * 6)
 
 	for _, list_name in ipairs(player_inventory_lists) do
 		for i = 1, player_inv:get_size(list_name) do
