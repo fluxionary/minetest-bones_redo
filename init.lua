@@ -7,7 +7,7 @@
 local S = minetest.get_translator("bones")
 
 bones = {}
-core.log("action","my bones")
+
 local function is_owner(pos, name)
 	local owner = minetest.get_meta(pos):get_string("owner")
 	if owner == "" or owner == name or minetest.check_player_privs(name, "protection_bypass") then
@@ -71,6 +71,9 @@ minetest.register_node("bones:bones", {
 
 	on_metadata_inventory_take = function(pos, listname, index, stack, player)
 		local meta = minetest.get_meta(pos)
+		core.log("action", player:get_player_name() ..
+			" takes " .. stack:get_name() ..
+			" from bones at " .. core.pos_to_string(pos))
 		if meta:get_inventory():is_empty("main") then
 			local inv = player:get_inventory()
 			if inv:room_for_item("main", {name = "bones:bones"}) then
@@ -86,7 +89,7 @@ minetest.register_node("bones:bones", {
 		if not is_owner(pos, player:get_player_name()) then
 			return
 		end
-		core.log("action","punch bones")
+		
 		if minetest.get_meta(pos):get_string("infotext") == "" then
 			return
 		end
@@ -99,6 +102,12 @@ minetest.register_node("bones:bones", {
 			local stk = inv:get_stack("main", i)
 			if player_inv:room_for_item("main", stk) then
 				inv:set_stack("main", i, nil)
+				local stk_name = stk:get_name()
+				if stk_name ~= "" then
+					core.log("action", player:get_player_name() ..
+						" takes " .. stk_name ..
+						" from bones at " .. core.pos_to_string(pos))
+				end
 				player_inv:add_item("main", stk)
 			else
 				has_space = false
@@ -129,6 +138,7 @@ minetest.register_node("bones:bones", {
 		end
 	end,
 	on_blast = function(pos)
+		core.log("action", "Bones at " .. core.pos_to_string(pos) .. " blasted.")
 	end,
 })
 
