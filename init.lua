@@ -71,7 +71,7 @@ minetest.register_node("bones:bones", {
 
 	on_metadata_inventory_take = function(pos, listname, index, stack, player)
 		local meta = minetest.get_meta(pos)
-		core.log("action", player:get_player_name() ..
+		core.log("action", "[Bones] " .. player:get_player_name() ..
 			" takes " .. stack:get_name() ..
 			" from bones at " .. core.pos_to_string(pos))
 		if meta:get_inventory():is_empty("main") then
@@ -104,7 +104,7 @@ minetest.register_node("bones:bones", {
 				inv:set_stack("main", i, nil)
 				local stk_name = stk:get_name()
 				if stk_name ~= "" then
-					core.log("action", player:get_player_name() ..
+					core.log("action", "[Bones] " .. player:get_player_name() ..
 						" takes " .. stk_name ..
 						" from bones at " .. core.pos_to_string(pos))
 				end
@@ -138,7 +138,7 @@ minetest.register_node("bones:bones", {
 		end
 	end,
 	on_blast = function(pos)
-		core.log("action", "Bones at " .. core.pos_to_string(pos) .. " blasted.")
+		core.log("action", "[Bones] " .. "Bones at " .. core.pos_to_string(pos) .. " blasted.")
 	end,
 })
 
@@ -179,6 +179,7 @@ end
 
 local drop = function(pos, itemstack)
 	local obj = minetest.add_item(pos, itemstack:take_item(itemstack:get_count()))
+	core.log("action","[Bones] " .. "Item " .. itemstack:get_name() .. " dropped at pos " .. core.pos_to_string(pos))
 	if obj then
 		obj:set_velocity({
 			x = math.random(-10, 10) / 9,
@@ -213,7 +214,7 @@ minetest.register_on_dieplayer(function(player)
 
 	-- return if keep inventory set or in creative mode
 	if bones_mode == "keep" or minetest.is_creative_enabled(player_name) then
-		minetest.log("action", player_name .. " dies at " .. pos_string ..
+		minetest.log("action", "[Bones] " .. player_name .. " dies at " .. pos_string ..
 			". No bones placed")
 		if bones_position_message then
 			minetest.chat_send_player(player_name, S("@1 died at @2.", player_name, pos_string))
@@ -223,7 +224,7 @@ minetest.register_on_dieplayer(function(player)
 
 	local player_inv = player:get_inventory()
 	if is_all_empty(player_inv) then
-		minetest.log("action", player_name .. " dies at " .. pos_string ..
+		minetest.log("action", "[Bones] " .. player_name .. " dies at " .. pos_string ..
 			". No bones placed")
 		if bones_position_message then
 			minetest.chat_send_player(player_name, S("@1 died at @2.", player_name, pos_string))
@@ -249,7 +250,7 @@ minetest.register_on_dieplayer(function(player)
 			player_inv:set_list(list_name, {})
 		end
 		drop(pos, ItemStack("bones:bones"))
-		minetest.log("action", player_name .. " dies at " .. pos_string ..
+		minetest.log("action", "[Bones] " .. player_name .. " dies at " .. pos_string ..
 			". Inventory dropped")
 		if bones_position_message then
 			minetest.chat_send_player(player_name, S("@1 died at @2, and dropped their inventory.", player_name, pos_string))
@@ -260,7 +261,7 @@ minetest.register_on_dieplayer(function(player)
 	local param2 = minetest.dir_to_facedir(player:get_look_dir())
 	minetest.set_node(pos, {name = "bones:bones", param2 = param2})
 
-	minetest.log("action", player_name .. " dies at " .. pos_string ..
+	minetest.log("action", "[Bones] " .. player_name .. " dies at " .. pos_string ..
 		". Bones placed")
 	if bones_position_message then
 		minetest.chat_send_player(player_name, S("@1 died at @2, and bones were placed.", player_name, pos_string))
