@@ -178,8 +178,11 @@ local function may_replace(pos, player)
 end
 
 local drop = function(pos, itemstack)
+	local stk_name = itemstack:get_name()
+	if stk_name ~= "" then
+		core.log("action","[Bones] " .. "Item " .. stk_name .. " dropped at pos " .. core.pos_to_string(pos))
+	end
 	local obj = minetest.add_item(pos, itemstack:take_item(itemstack:get_count()))
-	core.log("action","[Bones] " .. "Item " .. itemstack:get_name() .. " dropped at pos " .. core.pos_to_string(pos))
 	if obj then
 		obj:set_velocity({
 			x = math.random(-10, 10) / 9,
@@ -275,6 +278,10 @@ minetest.register_on_dieplayer(function(player)
 		for i = 1, player_inv:get_size(list_name) do
 			local stack = player_inv:get_stack(list_name, i)
 			if inv:room_for_item("main", stack) then
+				local stk_name = stack:get_name()
+				if stk_name ~= "" then
+					core.log("action","[Bones] " .. "Item " .. stk_name .. " added to bones at pos " .. core.pos_to_string(pos))
+				end
 				inv:add_item("main", stack)
 			else -- no space left
 				drop(pos, stack)
