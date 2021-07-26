@@ -72,7 +72,7 @@ minetest.register_node("bones:bones", {
 	on_metadata_inventory_take = function(pos, listname, index, stack, player)
 		local meta = minetest.get_meta(pos)
 		core.log("action", "[Bones] " .. player:get_player_name() ..
-			" takes " .. stack:get_name() ..
+			" takes " .. stack:to_string() .. 
 			" from bones at " .. core.pos_to_string(pos))
 		if meta:get_inventory():is_empty("main") then
 			local inv = player:get_inventory()
@@ -105,7 +105,7 @@ minetest.register_node("bones:bones", {
 				local stk_name = stk:get_name()
 				if stk_name ~= "" then
 					core.log("action", "[Bones] " .. player:get_player_name() ..
-						" takes " .. stk_name ..
+						" takes " .. stk:to_string() ..
 						" from bones at " .. core.pos_to_string(pos))
 				end
 				player_inv:add_item("main", stk)
@@ -180,7 +180,7 @@ end
 local drop = function(pos, itemstack)
 	local stk_name = itemstack:get_name()
 	if stk_name ~= "" then
-		core.log("action","[Bones] " .. "Item " .. stk_name .. " dropped at pos " .. core.pos_to_string(pos))
+		core.log("action","[Bones] " .. "Item " .. itemstack:to_string() .. " dropped at pos " .. core.pos_to_string(pos))
 	end
 	local obj = minetest.add_item(pos, itemstack:take_item(itemstack:get_count()))
 	if obj then
@@ -280,7 +280,7 @@ minetest.register_on_dieplayer(function(player)
 			if inv:room_for_item("main", stack) then
 				local stk_name = stack:get_name()
 				if stk_name ~= "" then
-					core.log("action","[Bones] " .. "Item " .. stk_name .. " added to bones at pos " .. core.pos_to_string(pos))
+					core.log("action","[Bones] " .. "Item " .. stack:to_string() .. " added to bones at pos " .. core.pos_to_string(pos))
 				end
 				inv:add_item("main", stack)
 			else -- no space left
