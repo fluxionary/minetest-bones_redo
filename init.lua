@@ -8,6 +8,8 @@ local S = minetest.get_translator("bones")
 
 bones = {}
 
+local enable_bones = true
+
 local function is_owner(pos, name)
 	local owner = minetest.get_meta(pos):get_string("owner")
 	if owner == "" or owner == name or minetest.check_player_privs(name, "protection_bypass") then
@@ -250,6 +252,9 @@ local function find_good_pos(death_pos, air_pos_list)
 end
 
 minetest.register_on_dieplayer(function(player)
+
+	if enable_bones == false then return end
+
 	local bones_mode = minetest.settings:get("bones_mode") or "bones"
 	if bones_mode ~= "bones" and bones_mode ~= "drop" and bones_mode ~= "keep" then
 		bones_mode = "bones"
@@ -311,6 +316,7 @@ minetest.register_on_dieplayer(function(player)
 			for i = 1, armor_inv:get_size("armor") do
 				drop(pos, armor_inv:get_stack("armor", i))
 			end
+			armor_inv:set_list("armor", {})
 		end
 		drop(pos, ItemStack("bones:bones"))
 		minetest.log("action", "[Bones] " .. player_name .. " dies at " .. pos_string ..
@@ -385,3 +391,25 @@ minetest.register_on_dieplayer(function(player)
 		meta:set_string("infotext", S("@1's bones", player_name))
 	end
 end)
+
+-- Chatcommand to toggle between "keep all inventory" and "let inv either drop or go to bones".
+
+local chatcommand_cmd = "bones_toggle"
+local chatcommand_definition = {
+    params = "", -- Short parameter description
+    description = "Chatcommand to toggle between 'keep all inventory' and 'let inv either drop or go to bones'.", -- Full description
+    privs = {staff = true}, -- Require the "privs" privilege to run
+    func = function(name, param)
+
+		if enable_bones == false or enable_bones == nil then
+			enable_bones = true
+			return true, "Bones will drop or go to a bones block"
+		else
+			enable_bones = false
+			return true, "Bones will stay with the player"
+		end
+		return false, "Something went wrong"
+    end
+}
+
+minetest.register_chatcommand(chatcommand_cmd, chatcommand_definition)
