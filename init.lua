@@ -3,6 +3,9 @@
 -- Minetest 0.4 mod: bones
 -- See README.txt for licensing and other information.
 
+local mod_start_time = core.get_us_time()
+core.log("action", "[MOD] bones loading")
+
 -- Load support for MT game translation.
 local S = minetest.get_translator("bones")
 
@@ -413,3 +416,6 @@ local chatcommand_definition = {
 }
 
 minetest.register_chatcommand(chatcommand_cmd, chatcommand_definition)
+
+local mod_end_time = (core.get_us_time() - mod_start_time) / 1000000
+core.log("action", "[MOD] bones loaded in [" .. mod_end_time .. "s]")
