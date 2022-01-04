@@ -194,7 +194,7 @@ end
 
 local player_inventory_lists = { "main", "craft" }
 bones.player_inventory_lists = player_inventory_lists
-
+ 
 local function is_all_empty(player_inv)
 	for _, list_name in ipairs(player_inventory_lists) do
 		if not player_inv:is_empty(list_name) then
@@ -202,6 +202,51 @@ local function is_all_empty(player_inv)
 		end
 	end
 	return true
+end
+
+local function has_armor(player_name)
+	local armor_inv = minetest.get_inventory({type="detached", name=player_name.."_armor"})
+	if not armor_inv or armor_inv:is_empty("armor") then
+		return false
+	end
+	return true
+end
+
+local function can_see(pos1,pos2)
+	pos1 = {
+		x= pos1.x + 0.001,
+		y= pos1.y + 0.001,
+		z= pos1.z + 0.001
+
+	}
+	-- Can we see from pos1 to pos2 ?
+	local ray = minetest.raycast(pos1, pos2, false, false)
+	local element = ray:next()
+	while element do
+		if element.type == "node" and core.get_node(element.under).name ~= "air" then
+			return false
+		end
+		element = ray:next()
+	end
+	return true
+end
+
+local function find_good_pos(death_pos, air_pos_list)
+	-- The air_pos_list comes in a list of air positions around the death pos.
+	-- The closer to the death pos, the better
+	-- but we shall only select it as a valid position, if we can see it.
+	local t = {}
+	for _,airpos in ipairs(air_pos_list) do
+		local dist = vector.distance(death_pos,airpos)
+		table.insert(t,{dist = dist, x = airpos.x,y = airpos.y,z = airpos.z})
+	end
+	table.sort(t, function (k1, k2) return k1.dist < k2.dist end )
+	for _,closepos in ipairs(t) do
+		if can_see(death_pos,closepos) then
+			return {x = closepos.x, y = closepos.y, z = closepos.z}
+		end
+	end
+	return nil
 end
 
 minetest.register_on_dieplayer(function(player)
@@ -226,7 +271,7 @@ minetest.register_on_dieplayer(function(player)
 	end
 
 	local player_inv = player:get_inventory()
-	if is_all_empty(player_inv) then
+	if is_all_empty(player_inv) and not has_armor(player_name) then
 		minetest.log("action", "[Bones] " .. player_name .. " dies at " .. pos_string ..
 			". No bones placed")
 		if bones_position_message then
@@ -237,11 +282,20 @@ minetest.register_on_dieplayer(function(player)
 
 	-- check if it's possible to place bones, if not find space near player
 	if bones_mode == "bones" and not may_replace(pos, player) then
-		local air = minetest.find_node_near(pos, 3, {"air"})
-		if air and not minetest.is_protected(air, player_name) then
-			pos = air
-		else
+		local distance = 3
+		local pos1 ={x=pos.x-distance,y=pos.y-distance,z=pos.z-distance}
+		local pos2 ={x=pos.x+distance,y=pos.y+distance,z=pos.z+distance}
+		local air_pos_list = minetest.find_nodes_in_area(pos1, pos2, {"air"}, true)
+		if not air_pos_list or not air_pos_list.air then
 			bones_mode = "drop"
+		else
+			local good_pos = find_good_pos(pos, air_pos_list.air)
+			
+			if good_pos and not minetest.is_protected(good_pos, player_name) then
+				pos = good_pos
+			else
+				bones_mode = "drop"
+			end
 		end
 	end
 
@@ -251,6 +305,12 @@ minetest.register_on_dieplayer(function(player)
 				drop(pos, player_inv:get_stack(list_name, i))
 			end
 			player_inv:set_list(list_name, {})
+		end
+		if has_armor(player_name) then
+			local armor_inv = minetest.get_inventory({type="detached", name=player_name.."_armor"})
+			for i = 1, armor_inv:get_size("armor") do
+				drop(pos, armor_inv:get_stack("armor", i))
+			end
 		end
 		drop(pos, ItemStack("bones:bones"))
 		minetest.log("action", "[Bones] " .. player_name .. " dies at " .. pos_string ..
@@ -274,6 +334,7 @@ minetest.register_on_dieplayer(function(player)
 	local inv = meta:get_inventory()
 	inv:set_size("main", 8 * 6)
 
+	-- main and crafting grid
 	for _, list_name in ipairs(player_inventory_lists) do
 		for i = 1, player_inv:get_size(list_name) do
 			local stack = player_inv:get_stack(list_name, i)
@@ -289,6 +350,23 @@ minetest.register_on_dieplayer(function(player)
 		end
 		player_inv:set_list(list_name, {})
 	end
+
+	-- armor
+	local armor_list_name = player_name.."_armor"
+	local armor_inv = minetest.get_inventory({type="detached", name=armor_list_name})
+	for i = 1, armor_inv:get_size("armor") do
+		local stack = armor_inv:get_stack("armor", i)
+		if inv:room_for_item("main", stack) then
+			local stk_name = stack:get_name()
+			if stk_name ~= "" then
+				core.log("action","[Bones] " .. "Armor " .. stack:to_string() .. " added to bones at pos " .. core.pos_to_string(pos))
+			end
+			inv:add_item("main", stack)
+		else -- no space left
+			drop(pos, stack)
+		end
+	end
+	armor_inv:set_list("armor", {})
 
 	meta:set_string("formspec", bones_formspec)
 	meta:set_string("owner", player_name)
