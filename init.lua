@@ -320,6 +320,8 @@ minetest.register_on_dieplayer(function(player)
 				drop(pos, armor_inv:get_stack("armor", i))
 			end
 			armor_inv:set_list("armor", {})
+			armor:save_armor_inventory(player)
+			armor:set_player_armor(player)
 		end
 		drop(pos, ItemStack("bones:bones"))
 		minetest.log("action", "[Bones] " .. player_name .. " dies at " .. pos_string ..
@@ -376,6 +378,8 @@ minetest.register_on_dieplayer(function(player)
 		end
 	end
 	armor_inv:set_list("armor", {})
+	armor:save_armor_inventory(player)
+	armor:set_player_armor(player)
 
 	meta:set_string("formspec", bones_formspec)
 	meta:set_string("owner", player_name)
