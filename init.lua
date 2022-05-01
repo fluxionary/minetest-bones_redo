@@ -256,17 +256,24 @@ end
 
 minetest.register_on_dieplayer(function(player)
 
-	if enable_bones == false then return end
-
 	local bones_mode = minetest.settings:get("bones_mode") or "bones"
 	if bones_mode ~= "bones" and bones_mode ~= "drop" and bones_mode ~= "keep" then
 		bones_mode = "bones"
 	end
 
 	local bones_position_message = minetest.settings:get_bool("bones_position_message") == true
+	local staff_position_message = minetest.settings:get_bool("staff_position_message") == true
 	local player_name = player:get_player_name()
 	local pos = vector.round(player:get_pos())
 	local pos_string = minetest.pos_to_string(pos)
+
+	-- We don't drop bones at all
+	if enable_bones == false then 
+		if staff_position_message and yl_commons and yl_commons.player_dies then
+			yl_commons.player_dies(player_name,pos_string,"keep")
+		end
+		return
+	end
 
 	-- return if keep inventory set or in creative mode
 	if bones_mode == "keep" or minetest.is_creative_enabled(player_name) then
@@ -274,6 +281,9 @@ minetest.register_on_dieplayer(function(player)
 			". No bones placed")
 		if bones_position_message then
 			minetest.chat_send_player(player_name, S("@1 died at @2.", player_name, pos_string))
+		end
+		if staff_position_message and yl_commons and yl_commons.player_dies then
+			yl_commons.player_dies(player_name,pos_string,"keep")
 		end
 		return
 	end
@@ -284,6 +294,9 @@ minetest.register_on_dieplayer(function(player)
 			". No bones placed")
 		if bones_position_message then
 			minetest.chat_send_player(player_name, S("@1 died at @2.", player_name, pos_string))
+		end
+		if staff_position_message and yl_commons and yl_commons.player_dies then
+			yl_commons.player_dies(player_name,pos_string,"none")
 		end
 		return
 	end
@@ -329,6 +342,9 @@ minetest.register_on_dieplayer(function(player)
 		if bones_position_message then
 			minetest.chat_send_player(player_name, S("@1 died at @2, and dropped their inventory.", player_name, pos_string))
 		end
+		if staff_position_message and yl_commons and yl_commons.player_dies then
+			yl_commons.player_dies(player_name,pos_string,"drop")
+		end
 		return
 	end
 
@@ -339,6 +355,9 @@ minetest.register_on_dieplayer(function(player)
 		". Bones placed")
 	if bones_position_message then
 		minetest.chat_send_player(player_name, S("@1 died at @2, and bones were placed.", player_name, pos_string))
+	end
+	if staff_position_message and yl_commons and yl_commons.player_dies then
+		yl_commons.player_dies(player_name,pos_string,"bones")
 	end
 
 	local meta = minetest.get_meta(pos)
