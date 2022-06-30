@@ -1,0 +1,26 @@
+# seconds after which a player's bones become public in an unprotected area
+bones.share_after (share bones after (unprotected)) int 1200 0 65535
+
+# seconds after which a player's bones become public in a protected area
+bones.share_after_protected (share bones after (protected)) int 900 0 65535
+
+# keep = stays in inventory; drop = items drop on ground; bones = create bones node/entity
+bones.mode (bones mode) enum bones keep,drop,bones
+
+# if true, items will drop on the ground if creating the bones node/entity fails
+bones.drop_on_failure (drop items on failure) bool false
+
+# shows the death position to the player on death
+bones.position_message (show position message) bool true
+
+# shows the death position to staff on death
+bones.staff_position_message (show staff position message) bool true
+
+# privilege by which to identify staff
+bones.staff_priv (staff privilege) string staff
+
+# how far to look for a good spot to put bones
+bones.search_distance (search distance) int 3 0 65535
+
+# which inventory lists to put into bones
+bones.lists_to_bones (inventory lists to put in bones) string main,craft,armor

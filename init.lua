@@ -11,6 +11,7 @@ bones = {
 
 	modname = modname,
 	modpath = modpath,
+	mod_storage = minetest.get_mod_storage(),
 
 	S = S,
 
@@ -38,5 +39,7 @@ bones.dofile("node")
 bones.dofile("entity")
 bones.dofile("on_dieplayer")
 bones.dofile("commands")
+
+bones.mod_storage = nil
 
 bones.log("action", "loaded in %s", (minetest.get_us_time() - mod_start_time) / 1e6)

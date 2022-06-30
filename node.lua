@@ -14,6 +14,7 @@ minetest.register_node("bones:bones", {
 	},
 	paramtype2 = "facedir",
 	groups = {dig_immediate = 2},
+	is_ground_content = false,
 	sounds = bones.resources.sounds.bones,
 
 	can_dig = function(pos, player)
@@ -61,13 +62,13 @@ minetest.register_node("bones:bones", {
 		end
 
 		local node_meta = minetest.get_meta(pos)
+		local node_inv = node_meta:get_inventory()
 
-		if node_meta:get_string("infotext") == "" then
+		if node_inv:is_empty("main") then
 			-- weird check for a "placed" (not "dropped") bones node
 			return
 		end
 
-		local node_inv = node_meta:get_inventory()
 		local player_inv = player:get_inventory()
 
 		for i = 1, node_inv:get_size("main") do

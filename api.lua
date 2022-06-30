@@ -1,5 +1,7 @@
 local api = {}
 
+local mod_storage = bones.mod_storage
+
 local S = bones.S
 local has = bones.has
 local settings = bones.settings
@@ -8,11 +10,14 @@ local util = bones.util
 local can_see = util.can_see
 local drop = util.drop
 local get_armor_inv = util.get_armor_inv
+local send_to_staff = util.send_to_staff
 local iterate_volume = util.iterate_volume
 
 local lists_to_bones = settings.lists_to_bones
 local share_after = settings.share_after
 local share_after_protected = settings.share_after_protected or share_after * (3/4)
+local player_position_message = settings.position_message
+local staff_position_message = settings.staff_position_message
 
 bones.enable_bones = true
 
@@ -21,9 +26,19 @@ function api.toggle_enabled()
 end
 
 function api.is_owner(pos, name)
+	local player = minetest.get_player_by_name(name)
+
+	if not (player and minetest.is_player(player) and player:get_hp() > 0) then
+		return false
+	end
+
 	local owner = minetest.get_meta(pos):get_string("owner")
 
-	return owner == "" or owner == name or minetest.check_player_privs(name, "protection_bypass")
+	return (
+		owner == "" or
+			owner == name or
+			minetest.check_player_privs(name, "protection_bypass")
+	)
 end
 
 function api.may_replace(pos, player)
@@ -31,22 +46,22 @@ function api.may_replace(pos, player)
 	local node_definition = minetest.registered_nodes[node_name]
 
 	-- if the node is unknown, we return false
-	if not node_definition then
+	if not node_definition or node_name == "ignore" then
 		return false
 	end
 
-	-- allow replacing air
-	if node_name == "air" then
+	-- allow replacing air and flowing liquid
+	if node_name == "air" or node_definition.liquidtype == "flowing" then
 		return true
 	end
 
-	-- don't replace non-nodes inside protections
+	-- don't replace most nodes inside protections
 	if minetest.is_protected(pos, player:get_player_name()) then
 		return false
 	end
 
-	-- allow replacing liquids
-	if node_definition.liquidtype ~= "none" then
+	-- allow replacing unprotected sources
+	if node_definition.liquidtype == "source" then
 		return true
 	end
 
@@ -84,7 +99,7 @@ function api.find_good_pos(player, death_pos, radius)
 end
 
 -- also clears inventories
-local function get_stacks_for_bones(player)
+function api.collect_stacks_for_bones(player)
 	local player_inv = player:get_inventory()
 	local player_name = player:get_player_name()
 
@@ -120,7 +135,7 @@ end
 function api.place_bones_node(player, bones_pos)
 	local player_name = player:get_player_name()
 
-	local stacks_for_bones = get_stacks_for_bones(player)
+	local stacks_for_bones = api.collect_stacks_for_bones(player)
 
 	minetest.set_node(bones_pos, {
 		name = "bones:bones",
@@ -129,14 +144,14 @@ function api.place_bones_node(player, bones_pos)
 
 	local node_meta = minetest.get_meta(bones_pos)
 	local node_inv = node_meta:get_inventory()
-	node_inv:set_size("main", #stacks_for_bones + 1)
+	node_inv:set_size("main", #stacks_for_bones)
 
 	local pos_string = minetest.pos_to_string(bones_pos)
 
 	for _, stack in ipairs(stacks_for_bones) do
 		local remainder = node_inv:add_item("main", stack)
 		if remainder:is_empty() then
-			bones.log("action", "%s added %s to bones @ %s", player_name, stack:to_string(), pos_string)
+			bones.log("action", "%s added %s to bones @ %s", player_name, stack, pos_string)
 		else
 			drop(remainder, player, bones_pos)
 		end
@@ -165,7 +180,7 @@ end
 function api.place_bones_entity(player, death_pos)
 	local player_name = player:get_player_name()
 
-	local stacks_for_bones = get_stacks_for_bones(player)
+	local stacks_for_bones = api.collect_stacks_for_bones(player)
 	local serialized_inv = minetest.write_json(stacks_for_bones)
 
 	if not serialized_inv then
@@ -203,11 +218,68 @@ function api.place_bones_entity(player, death_pos)
 end
 
 function api.drop_inventory(player, death_pos)
-	for _, stack in ipairs(get_stacks_for_bones(player)) do
+	for _, stack in ipairs(api.collect_stacks_for_bones(player)) do
 		drop(stack, player, death_pos)
 	end
 
 	drop(ItemStack("bones:bones"), player, death_pos)
+end
+
+function api.get_death_pos(player)
+	local death_pos = vector.round(player:get_pos())
+	local pos_below = vector.subtract(death_pos, vector.new(0, 1, 0))
+	local count = 0
+	while true do
+		count = count + 1
+
+		if count >= 512 or not api.may_replace(pos_below, player) then
+			return death_pos
+		end
+
+		death_pos.y = death_pos.y - 1
+		pos_below.y = pos_below.y - 1
+	end
+end
+
+api.death_cache = {}
+
+function api.record_death(player, pos, mode)
+	local player_name = player:get_player_name()
+	local pos_string = minetest.pos_to_string(pos)
+    local text = player_name .. " dies at " .. pos_string
+
+    if mode == "keep" then
+        text = text .. " and keeps their inventory."
+    elseif mode == "drop" then
+        text = text .. " and drops their inventory."
+    elseif mode == "bones" then
+        text = text .. " and their inventory goes to bones."
+    elseif mode == "none" then
+        text = text .. " and doesn't have any inventory to be dropped."
+    end
+
+	local death_cache = api.death_cache[player_name] or {}
+	table.insert(death_cache, {pos, mode})
+	api.death_cache[player_name] = death_cache
+
+	mod_storage:set_string(("%s's last death"):format(player_name), pos_string)
+
+	bones.log("action", text)
+
+	if player_position_message then
+		minetest.chat_send_player(player_name, S("@1 died at @2.", player_name, pos_string))
+	end
+
+	if staff_position_message then
+        send_to_staff(text)
+	end
+end
+
+function api.get_last_death_pos(player_name)
+	local pos_string = mod_storage:get(("%s's last death"):format(player_name))
+	if pos_string then
+		return minetest.string_to_pos(pos_string)
+	end
 end
 
 bones.api = api

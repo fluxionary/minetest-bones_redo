@@ -1,5 +1,8 @@
 local util = {}
 
+local lists_to_bones = bones.settings.lists_to_bones
+local staff_priv = bones.settings.staff_priv
+
 function util.serialize_invlist(inv, listname)
 	local itemstrings = {}
 	local list = inv:get_list(listname)
@@ -84,7 +87,7 @@ function util.are_inventories_empty(player)
 	local player_inv = player:get_inventory()
 	local player_name = player:get_player_name()
 
-	for _, list_name in ipairs(bones.settings.lists_to_bones) do
+	for _, list_name in ipairs(lists_to_bones) do
 		local inv
 		if list_name == "armor" then
 			inv = util.get_armor_inv(player_name)
@@ -103,7 +106,7 @@ end
 function util.send_to_staff(text)
 	local message = minetest.colorize("#98ff98", "[STAFF] " .. text)
 	for _, player in ipairs(minetest.get_connected_players()) do
-		if minetest.is_player(player) and minetest.check_player_privs(player, "staff") then
+		if minetest.is_player(player) and minetest.check_player_privs(player, staff_priv) then
 			local name = player:get_player_name()
 			minetest.chat_send_player(name, message)
 		end

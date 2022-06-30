@@ -91,14 +91,18 @@ minetest.register_entity("bones:bones", {
 
 		active_entities[self._detached_inv_name] = self
 
+		local props = self.object:get_properties()
+
 		if self._old then
-			self.infotext = S("@1's bones", self._owner)
-			self.nametag = S("@1's bones", self._owner)
+			props.infotext = S("@1's bones", self._owner)
+			props.nametag = S("@1's bones", self._owner)
 
 		else
-			self.infotext = S("@1's fresh bones", self._owner)
-			self.nametag = S("@1's fresh bones", self._owner)
+			props.infotext = S("@1's fresh bones", self._owner)
+			props.nametag = S("@1's fresh bones", self._owner)
 		end
+
+		self.object:set_properties(props)
 	end,
 
 	on_deactivate = function(self, removal)
