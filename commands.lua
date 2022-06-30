@@ -1,6 +1,3 @@
-
-local enable_bones = true
-
 minetest.register_chatcommand("bones_toggle", {
     params = "",
     description = "Chatcommand to toggle between 'keep all inventory' and 'let inv either drop or go to bones'.",

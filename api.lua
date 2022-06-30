@@ -76,16 +76,28 @@ function api.may_replace(pos, player)
 	return node_definition.buildable_to
 end
 
-function api.find_good_pos(player, death_pos, radius)
+local y1 = vector.new(0, 1, 0)
+
+function api.find_place_for_bones(player, death_pos, radius)
 	local possible_bones_pos = {}
 
 	for pos in iterate_volume(death_pos, radius) do
 		if api.may_replace(pos, player) then
-			table.insert(possible_bones_pos, {pos = pos, dist = vector.distance(death_pos, pos)})
+			local pos_below = vector.subtract(pos, y1)
+			table.insert(possible_bones_pos, {
+				pos = pos,
+				dist = vector.distance(death_pos, pos),
+				can_place_below = api.may_replace(pos_below, player),
+			})
 		end
 	end
 
 	table.sort(possible_bones_pos, function(k1, k2)
+		if k1.can_place_below and not k2.can_place_below then
+			return false
+		elseif not k1.can_place_below and k2.can_place_below then
+			return true
+		end
 		return k1.dist < k2.dist
 	end)
 

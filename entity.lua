@@ -6,8 +6,6 @@ local util = bones.util
 local serialize_invlist = util.serialize_invlist
 local deserialize_invlist = util.deserialize_invlist
 
-local active_entities = {}
-
 local function is_owner(self, name)
 	local owner = self._owner
 
@@ -89,8 +87,6 @@ minetest.register_entity("bones:bones", {
 
 		deserialize_invlist(data.serialized_inv, self._inv, "main")
 
-		active_entities[self._detached_inv_name] = self
-
 		local props = self.object:get_properties()
 
 		if self._old then
@@ -123,7 +119,6 @@ minetest.register_entity("bones:bones", {
 		end
 
 		minetest.remove_detached_inventory(self._detached_inv_name)
-		active_entities[self._detached_inv_name] = nil
 		self._detached_inv_name = nil
 		self._inv = nil
 	end,
