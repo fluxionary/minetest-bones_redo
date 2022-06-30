@@ -18,6 +18,9 @@ local share_after = settings.share_after
 local share_after_protected = settings.share_after_protected or share_after * (3/4)
 local player_position_message = settings.position_message
 local staff_position_message = settings.staff_position_message
+local ground_search_distance = settings.ground_search_distance
+
+local y1 = vector.new(0, 1, 0)
 
 bones.enable_bones = true
 
@@ -75,8 +78,6 @@ function api.may_replace(pos, player)
 	-- flowers being squished by bones are more realistical than a squished stone, too
 	return node_definition.buildable_to
 end
-
-local y1 = vector.new(0, 1, 0)
 
 function api.find_place_for_bones(player, death_pos, radius)
 	local possible_bones_pos = {}
@@ -239,12 +240,12 @@ end
 
 function api.get_death_pos(player)
 	local death_pos = vector.round(player:get_pos())
-	local pos_below = vector.subtract(death_pos, vector.new(0, 1, 0))
+	local pos_below = vector.subtract(death_pos, y1)
 	local count = 0
 	while true do
 		count = count + 1
 
-		if count >= 512 or not api.may_replace(pos_below, player) then
+		if count >= ground_search_distance or not api.may_replace(pos_below, player) then
 			return death_pos
 		end
 

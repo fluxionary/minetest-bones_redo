@@ -12,7 +12,6 @@ minetest.register_on_dieplayer(function(player)
 	local player_name = player:get_player_name()
 	local death_pos = api.get_death_pos(player)
 
-	-- return if keep inventory set or in creative mode
 	if not bones.enable_bones or bones_mode == "keep" or minetest.is_creative_enabled(player_name) then
 		api.record_death(player_name, death_pos, "keep")
 		return
@@ -23,7 +22,6 @@ minetest.register_on_dieplayer(function(player)
 		return
 	end
 
-	-- check if it's possible to place bones, if not find space near player
 	if bones_mode == "bones" then
 		local bones_pos = api.find_place_for_bones(player, death_pos, search_distance)
 		local success

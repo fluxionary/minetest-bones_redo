@@ -19,8 +19,11 @@ bones.staff_position_message (show staff position message) bool true
 # privilege by which to identify staff
 bones.staff_priv (staff privilege) string staff
 
-# how far to look for a good spot to put bones
+# how far to look around for a good spot to put bones
 bones.search_distance (search distance) int 3 0 65535
+
+# how far down to look for ground when recording a death
+bones.ground_search_distance (ground search distance) int 128 0 65535
 
 # which inventory lists to put into bones
 bones.lists_to_bones (inventory lists to put in bones) string main,craft,armor

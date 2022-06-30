@@ -12,6 +12,7 @@ bones.settings = {
 	staff_priv = s:get("bones.staff_priv") or "staff",
 
 	search_distance = tonumber(s:get("bones.search_distance")) or 3,
+	ground_search_distance = tonumber(s:get("bones.ground_search_distance")) or 128,
 
 	lists_to_bones = string.split(s:get("bones.lists_to_bones") or "main,craft,armor"),
 }
