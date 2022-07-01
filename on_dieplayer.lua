@@ -8,7 +8,7 @@ local bones_mode = settings.mode
 local drop_on_failure= settings.drop_on_failure
 local search_distance = settings.search_distance
 
-minetest.register_on_dieplayer(function(player)
+function api.on_dieplayer(player)
 	local player_name = player:get_player_name()
 	local death_pos = api.get_death_pos(player)
 
@@ -44,4 +44,8 @@ minetest.register_on_dieplayer(function(player)
 	end
 
 	api.record_death(player_name, death_pos, "keep")
+end
+
+minetest.register_on_dieplayer(function(player)
+	return api.on_dieplayer(player)
 end)

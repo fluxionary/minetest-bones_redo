@@ -1,18 +1,20 @@
-Minetest mod: bones
-========================
-See license.txt for license information.
+# bones: a redo of the mod from minetest_game
 
-Authors of source code
-----------------------
-* Originally by PilzAdam (MIT)
-* Various Minetest developers and contributors ?-2022, (MIT)
-* Flux 2022 (AGPL)
+https://github.com/minetest/minetest_game/tree/master/mods/bones
 
-Authors of media (textures)
----------------------------
-All textures: paramat (CC BY-SA 3.0)
+## features
 
----------------------------
+assuming you know how the old bones mod worked:
+
+* if a bones node cannot be placed, a bones "entity" is placed instead
+* tries to put bones on the ground instead of floating in the air
+* api allows for adding custom behavior
+
+## settings
+
+see setingtypes.txt
+
+## old surrealist poetry
 
 Its combination of instant and eternal action ensures that DEATH is absolutely harmless to man or mammals.
 
@@ -33,3 +35,16 @@ DEATH can be used in wardropes and wall-cupboards. Shut them immediately after e
 DEATH is recommened in Spring, from April onwards.
 
 DEATH IS GOOD FOR YOU. NON-TOXIC.
+
+## license
+
+see LICENSE.md
+
+### Authors of source code
+* Originally by PilzAdam (MIT)
+* Various Minetest developers and contributors ?-2022, (MIT)
+* Flux 2022 (AGPL)
+
+### Authors of media (textures)
+All textures: paramat (CC BY-SA 3.0)
+
