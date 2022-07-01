@@ -4,9 +4,9 @@ See license.txt for license information.
 
 Authors of source code
 ----------------------
-Originally by PilzAdam (MIT)
-Various Minetest developers and contributors (MIT)
-Flux (...)
+* Originally by PilzAdam (MIT)
+* Various Minetest developers and contributors ?-2022, (MIT)
+* Flux 2022 (AGPL)
 
 Authors of media (textures)
 ---------------------------
