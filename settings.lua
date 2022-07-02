@@ -5,7 +5,8 @@ bones.settings = {
 	share_after_protected = tonumber(s:get("bones.share_after_protected")),
 
 	mode = s:get("bones.mode") or "bones",
-	drop_on_failure = s:get_bool("bones.drop_on_failure", false),
+	mode_protected = s:get("bones.mode_protected") or "bones",
+	keep_on_failure = s:get_bool("bones.keep_on_failure", true),
 
 	position_message = s:get_bool("bones.position_message", true),
 	staff_position_message = s:get_bool("bones.staff_position_message", true),

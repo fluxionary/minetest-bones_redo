@@ -5,14 +5,17 @@ local util = bones.util
 local are_inventories_empty = util.are_inventories_empty
 
 local bones_mode = settings.mode
-local drop_on_failure= settings.drop_on_failure
+local mode_protected = settings.mode_protected
+local keep_on_failure = settings.keep_on_failure
 local search_distance = settings.search_distance
 
 function api.on_dieplayer(player)
 	local player_name = player:get_player_name()
 	local death_pos = api.get_death_pos(player)
 
-	if not bones.enable_bones or bones_mode == "keep" or minetest.is_creative_enabled(player_name) then
+	local mode = minetest.is_protected(death_pos, player_name) and mode_protected or bones_mode
+
+	if not bones.enable_bones or mode == "keep" or minetest.is_creative_enabled(player_name) then
 		api.record_death(player_name, death_pos, "keep")
 		return
 	end
@@ -22,7 +25,7 @@ function api.on_dieplayer(player)
 		return
 	end
 
-	if bones_mode == "bones" then
+	if mode == "bones" then
 		local bones_pos = api.find_place_for_bones(player, death_pos, search_distance)
 		local success
 		if bones_pos then
@@ -37,7 +40,7 @@ function api.on_dieplayer(player)
 		end
 	end
 
-	if drop_on_failure or bones_mode == "drop" then
+	if not keep_on_failure or mode == "drop" then
 		api.drop_inventory(player, death_pos)
 		api.record_death(player_name, death_pos, "drop")
 		return
