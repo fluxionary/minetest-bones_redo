@@ -258,8 +258,7 @@ end
 api.death_cache = {}
 api.timeouts_by_name = {}
 
-function api.record_death(player, pos, mode)
-	local player_name = player:get_player_name()
+function api.record_death(player_name, pos, mode)
 	local pos_string = minetest.pos_to_string(pos)
 
 	local death_cache = api.death_cache[player_name] or {}
