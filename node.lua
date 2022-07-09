@@ -39,13 +39,16 @@ minetest.register_node("bones:bones", {
 	end,
 
 	on_metadata_inventory_take = function(pos, listname, index, stack, player)
-		local meta = minetest.get_meta(pos)
+		local player_name = player:get_player_name()
 		bones.log("action", "%s takes %s from bones @ %s",
-			player:get_player_name(), stack:to_string(), minetest.pos_to_string(pos))
+			player_name, stack:to_string(), minetest.pos_to_string(pos)
+		)
 
+		local meta = minetest.get_meta(pos)
 		local node_inv = meta:get_inventory()
+
 		if node_inv:is_empty("main") then
-			if not api.is_timed_out(player) then
+			if not (api.is_owner(pos, player_name) and api.is_timed_out(player)) then
 				local player_inv = player:get_inventory()
 				local remainder = player_inv:add_item("main", {name = "bones:bones"})
 
@@ -59,7 +62,9 @@ minetest.register_node("bones:bones", {
 	end,
 
 	on_punch = function(pos, node, player)
-		if not api.is_owner(pos, player:get_player_name()) then
+		local player_name = player:get_player_name()
+
+		if not api.is_owner(pos, player_name) then
 			return
 		end
 
@@ -81,14 +86,15 @@ minetest.register_node("bones:bones", {
 
 			local taken = before:take_item(remainder:get_count())
 			if not taken:is_empty() then
-				minetest.log("action", "%s takes %s from bones @ %s",
-					player:get_player_name(), stack:to_string(), minetest.pos_to_string(pos))
+				bones.log("action", "%s takes %s from bones @ %s",
+					player:get_player_name(), stack:to_string(), minetest.pos_to_string(pos)
+				)
 			end
 		end
 
 		-- remove bones if player emptied them
 		if node_inv:is_empty("main") then
-			if not api.is_timed_out(player) then
+			if not (api.is_owner(pos, player_name) and api.is_timed_out(player)) then
 				local remainder = player_inv:add_item("main", {name = "bones:bones"})
 
 				if not remainder:is_empty() then

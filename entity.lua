@@ -70,11 +70,13 @@ minetest.register_entity("bones:bones", {
 			end,
 
 			on_take = function(inv, listname, index, stack, player)
+				local player_name = player:get_player_name()
 				bones.log("action", "%s takes %s from bones entity @ %s",
-					player:get_player_name(), stack:to_string(), minetest.pos_to_string(pos))
+					player_name, stack:to_string(), minetest.pos_to_string(pos)
+				)
 
 				if inv:is_empty("main") then
-					if not api.is_timed_out(player) then
+					if not (is_owner(self, player_name) and api.is_timed_out(player)) then
 						local player_inv = player:get_inventory()
 						local remainder = player_inv:add_item("main", {name = "bones:bones"})
 
@@ -128,8 +130,9 @@ minetest.register_entity("bones:bones", {
 
 	on_punch = function(self, puncher, time_from_last_punch, tool_capabilities, dir, damage)
 		local pos = self.object:get_pos()
+		local player_name = puncher:get_player_name()
 
-		if not is_owner(self, puncher:get_player_name()) then
+		if not is_owner(self, player_name) then
 			return
 		end
 
@@ -144,14 +147,15 @@ minetest.register_entity("bones:bones", {
 
 			local taken = before:take_item(remainder:get_count())
 			if not taken:is_empty() then
-				minetest.log("action", "%s takes %s from bones @ %s",
-					puncher:get_player_name(), stack:to_string(), minetest.pos_to_string(pos))
+				bones.log("action", "%s takes %s from bones @ %s",
+					player_name, stack:to_string(), minetest.pos_to_string(pos)
+				)
 			end
 		end
 
 		-- remove bones if player emptied them
 		if bones_inv:is_empty("main") then
-			if not api.is_timed_out(puncher) then
+			if not (is_owner(self, player_name) and api.is_timed_out(puncher)) then
 				local remainder = player_inv:add_item("main", {name = "bones:bones"})
 
 				if not remainder:is_empty() then
