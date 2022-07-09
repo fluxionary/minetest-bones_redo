@@ -16,4 +16,6 @@ bones.settings = {
 	ground_search_distance = tonumber(s:get("bones.ground_search_distance")) or 128,
 
 	lists_to_bones = string.split(s:get("bones.lists_to_bones") or "main,craft,armor"),
+
+	bone_node_timeout = tonumber(s:get("bones.bone_node_timeout")) or 3600,
 }

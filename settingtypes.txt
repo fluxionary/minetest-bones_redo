@@ -30,3 +30,6 @@ bones.ground_search_distance (ground search distance) int 128 0 65535
 
 # which inventory lists to put into bones
 bones.lists_to_bones (inventory lists to put in bones) string main,craft,armor
+
+# how long a player has to wait before they can get another bone node from their own bones (0 disables)
+bones.bone_node_timeout (bone node timeout) int 3600 0 86400

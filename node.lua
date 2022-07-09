@@ -45,11 +45,13 @@ minetest.register_node("bones:bones", {
 
 		local node_inv = meta:get_inventory()
 		if node_inv:is_empty("main") then
-			local player_inv = player:get_inventory()
-			local remainder = player_inv:add_item("main", {name = "bones:bones"})
+			if not api.is_timed_out(player) then
+				local player_inv = player:get_inventory()
+				local remainder = player_inv:add_item("main", {name = "bones:bones"})
 
-			if not remainder:is_empty() then
-				minetest.add_item(pos, remainder)
+				if not remainder:is_empty() then
+					minetest.add_item(pos, remainder)
+				end
 			end
 
 			minetest.remove_node(pos)
@@ -86,10 +88,12 @@ minetest.register_node("bones:bones", {
 
 		-- remove bones if player emptied them
 		if node_inv:is_empty("main") then
-			local remainder = player_inv:add_item("main", {name = "bones:bones"})
+			if not api.is_timed_out(player) then
+				local remainder = player_inv:add_item("main", {name = "bones:bones"})
 
-			if not remainder:is_empty() then
-				minetest.add_item(pos, remainder)
+				if not remainder:is_empty() then
+					minetest.add_item(pos, remainder)
+				end
 			end
 
 			minetest.remove_node(pos)

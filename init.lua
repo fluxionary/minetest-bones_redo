@@ -1,6 +1,3 @@
-local mod_start_time = minetest.get_us_time()
-minetest.log("action", "[MOD] bones loading")
-
 local modname = minetest.get_current_modname()
 local modpath = minetest.get_modpath(modname)
 local S = minetest.get_translator(modname)
@@ -41,5 +38,3 @@ bones.dofile("on_dieplayer")
 bones.dofile("commands")
 
 bones.mod_storage = nil
-
-bones.log("action", "loaded in %s", (minetest.get_us_time() - mod_start_time) / 1e6)

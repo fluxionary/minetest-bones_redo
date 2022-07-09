@@ -19,6 +19,7 @@ local share_after_protected = settings.share_after_protected or share_after * (3
 local player_position_message = settings.position_message
 local staff_position_message = settings.staff_position_message
 local ground_search_distance = settings.ground_search_distance
+local bone_node_timeout = settings.bone_node_timeout
 
 local y1 = vector.new(0, 1, 0)
 
@@ -255,10 +256,22 @@ function api.get_death_pos(player)
 end
 
 api.death_cache = {}
+api.timeouts_by_name = {}
 
 function api.record_death(player, pos, mode)
 	local player_name = player:get_player_name()
 	local pos_string = minetest.pos_to_string(pos)
+
+	local death_cache = api.death_cache[player_name] or {}
+	table.insert(death_cache, {pos, mode})
+	api.death_cache[player_name] = death_cache
+
+	mod_storage:set_string(("%s's last death"):format(player_name), pos_string)
+
+	if not api.timeouts_by_name[player_name] then
+		api.timeouts_by_name[player_name] = (minetest.get_us_time() / 1e6) + bone_node_timeout
+	end
+
     local text = player_name .. " dies at " .. pos_string
 
     if mode == "keep" then
@@ -271,12 +284,6 @@ function api.record_death(player, pos, mode)
         text = text .. " and doesn't have any inventory to be dropped."
     end
 
-	local death_cache = api.death_cache[player_name] or {}
-	table.insert(death_cache, {pos, mode})
-	api.death_cache[player_name] = death_cache
-
-	mod_storage:set_string(("%s's last death"):format(player_name), pos_string)
-
 	bones.log("action", text)
 
 	if player_position_message then
@@ -286,6 +293,24 @@ function api.record_death(player, pos, mode)
 	if staff_position_message then
         send_to_staff(text)
 	end
+end
+
+function api.is_timed_out(player)
+	local player_name = player:get_player_name()
+	local timeout = api.timeouts_by_name[player_name]
+
+	if not timeout then
+		return false
+	end
+
+	local now = minetest.get_us_time() / 1e6
+
+	if now > timeout then
+		api.timeouts_by_name[player_name] = nil
+		return false
+	end
+
+	return true
 end
 
 function api.get_last_death_pos(player_name)

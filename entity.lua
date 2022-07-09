@@ -1,5 +1,6 @@
 local S = bones.S
 
+local api = bones.api
 local formspec = bones.formspec
 local util = bones.util
 
@@ -73,11 +74,13 @@ minetest.register_entity("bones:bones", {
 					player:get_player_name(), stack:to_string(), minetest.pos_to_string(pos))
 
 				if inv:is_empty("main") then
-					local player_inv = player:get_inventory()
-					local remainder = player_inv:add_item("main", {name = "bones:bones"})
+					if not api.is_timed_out(player) then
+						local player_inv = player:get_inventory()
+						local remainder = player_inv:add_item("main", {name = "bones:bones"})
 
-					if not remainder:is_empty() then
-						minetest.add_item(pos, remainder)
+						if not remainder:is_empty() then
+							minetest.add_item(pos, remainder)
+						end
 					end
 
 					self.object:remove()
@@ -148,10 +151,12 @@ minetest.register_entity("bones:bones", {
 
 		-- remove bones if player emptied them
 		if bones_inv:is_empty("main") then
-			local remainder = player_inv:add_item("main", {name = "bones:bones"})
+			if not api.is_timed_out(puncher) then
+				local remainder = player_inv:add_item("main", {name = "bones:bones"})
 
-			if not remainder:is_empty() then
-				minetest.add_item(pos, remainder)
+				if not remainder:is_empty() then
+					minetest.add_item(pos, remainder)
+				end
 			end
 
 			self.object:remove()
