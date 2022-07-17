@@ -101,6 +101,7 @@ function api.find_place_for_bones(player, death_pos, radius)
 			table.insert(possible_bones_pos, {
 				pos = pos,
 				dist = vector.distance(death_pos, pos),
+				-- if we can place the bones lower, then we prefer to do that
 				can_place_below = api.may_replace(pos_below, player),
 			})
 		end
@@ -127,9 +128,8 @@ function api.find_place_for_bones(player, death_pos, radius)
 		end
 	end
 
-	local possible_pos = possible_bones_pos[1]
-	if possible_pos then
-		return possible_pos.pos
+	if #possible_bones_pos > 0 then
+		return possible_bones_pos[1].pos
 	end
 end
 
