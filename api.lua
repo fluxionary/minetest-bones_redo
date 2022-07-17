@@ -153,9 +153,8 @@ function api.find_place_for_bones(player, death_pos, radius)
 		end
 	end
 
-	local possible_pos = possible_bones_pos[1]
-	if possible_pos then
-		return possible_pos.pos
+	if #possible_bones_pos > 0 then
+		return possible_bones_pos[1].pos
 	end
 end
 
