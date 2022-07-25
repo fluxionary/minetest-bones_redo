@@ -18,10 +18,6 @@ bones.formspec = {
 			name = self._detached_inv_name,
 		})
 
-		if not inv then
-			minetest.chat_send_all(("can't find %s"):format(self._detached_inv_name))
-		end
-
 		local our_list = ("detached:%s"):format(minetest.formspec_escape(self._detached_inv_name))
 
 		return ([[
