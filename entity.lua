@@ -2,10 +2,9 @@ local S = bones.S
 
 local api = bones.api
 local formspec = bones.formspec
-local util = bones.util
 
-local serialize_invlist = util.serialize_invlist
-local deserialize_invlist = util.deserialize_invlist
+local serialize_invlist = futil.serialize_invlist
+local deserialize_invlist = futil.deserialize_invlist
 
 local function is_owner(self, name)
 	local owner = self._owner

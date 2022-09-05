@@ -11,7 +11,7 @@ local can_see = util.can_see
 local drop = util.drop
 local get_armor_inv = util.get_armor_inv
 local send_to_staff = util.send_to_staff
-local iterate_volume = util.iterate_volume
+local iterate_volume = futil.iterate_volume
 
 local lists_to_bones = settings.lists_to_bones
 local share_after = settings.share_after

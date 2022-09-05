@@ -13,11 +13,6 @@ bones.formspec = {
 			return
 		end
 
-		local inv = minetest.get_inventory({
-			type = "detached",
-			name = self._detached_inv_name,
-		})
-
 		local our_list = ("detached:%s"):format(minetest.formspec_escape(self._detached_inv_name))
 
 		return ([[

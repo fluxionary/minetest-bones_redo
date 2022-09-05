@@ -3,37 +3,6 @@ local util = {}
 local lists_to_bones = bones.settings.lists_to_bones
 local staff_priv = bones.settings.staff_priv
 
-function util.serialize_invlist(inv, listname)
-	local itemstrings = {}
-	local list = inv:get_list(listname)
-	if not list then
-		error(("couldn't find %s of %s"):format(listname, minetest.write_json(inv:get_location())))
-	end
-	for _, stack in ipairs(list) do
-		if not stack:is_empty() then
-			table.insert(itemstrings, stack:to_string())
-		end
-	end
-	return minetest.write_json(itemstrings)
-end
-
-function util.deserialize_invlist(serialized_inv, inv, listname)
-	if not inv:is_empty(listname) then
-		error(("trying to deserialize into a non-empty list %s (%s)"):format(listname, serialized_inv))
-	end
-
-	local itemstrings = minetest.parse_json(serialized_inv)
-
-	inv:set_size(listname, #itemstrings)
-
-	for _, itemstring in ipairs(itemstrings) do
-		local remainder = inv:add_item(listname, itemstring)
-		if not remainder:is_empty() then
-			bones.log("error", "lost %s", remainder:to_string())
-		end
-	end
-end
-
 function util.drop(itemstack, dropper, pos)
 	if itemstack:is_empty() then
 		return
@@ -109,31 +78,6 @@ function util.send_to_staff(text)
 		if minetest.is_player(player) and minetest.check_player_privs(player, staff_priv) then
 			local name = player:get_player_name()
 			minetest.chat_send_player(name, message)
-		end
-	end
-end
-
-function util.iterate_volume(pos, radius)
-	local start = vector.subtract(pos, radius)
-	local stop = vector.add(pos, radius)
-	local cur = table.copy(start)
-	cur.x = cur.x - 1
-	return function()
-		if cur.z > stop.z then
-			return
-		end
-
-		cur.x = cur.x + 1
-		if cur.x > stop.x then
-			cur.x = start.x
-			cur.y = cur.y + 1
-		end
-		if cur.y > stop.y then
-			cur.y = start.y
-			cur.z = cur.z + 1
-		end
-		if cur.z <= stop.z then
-			return vector.copy(cur)
 		end
 	end
 end

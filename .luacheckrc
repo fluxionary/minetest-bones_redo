@@ -26,6 +26,7 @@ stds.bones = {
 		"bones",
 	},
 	read_globals = {
+		"futil",
 		"default",
 		"armor",
 	},
