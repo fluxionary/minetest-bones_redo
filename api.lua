@@ -11,7 +11,9 @@ local can_see = util.can_see
 local drop = util.drop
 local get_armor_inv = util.get_armor_inv
 local send_to_staff = util.send_to_staff
+
 local iterate_volume = futil.iterate_volume
+local is_inside_world_bounds = futil.is_inside_world_bounds
 
 local lists_to_bones = settings.lists_to_bones
 local share_after = settings.share_after
@@ -46,6 +48,10 @@ function api.is_owner(pos, name)
 end
 
 function api.may_replace(pos, player)
+	if not is_inside_world_bounds(pos) then
+		return false
+	end
+
 	local node_name = minetest.get_node(pos).name
 	local node_definition = minetest.registered_nodes[node_name]
 
@@ -97,9 +103,11 @@ function api.find_place_for_bones(player, death_pos, radius)
 	table.sort(possible_bones_pos, function(k1, k2)
 		if k1.can_place_below and not k2.can_place_below then
 			return false
+
 		elseif not k1.can_place_below and k2.can_place_below then
 			return true
 		end
+
 		return k1.dist < k2.dist
 	end)
 
@@ -153,8 +161,8 @@ function api.place_bones_node(player, bones_pos)
 
 	minetest.set_node(bones_pos, {
 		name = "bones:bones",
-		param2 = minetest.dir_to_facedir(player:get_look_dir())}
-	)
+		param2 = minetest.dir_to_facedir(player:get_look_dir())
+	})
 
 	local node_meta = minetest.get_meta(bones_pos)
 	local node_inv = node_meta:get_inventory()
