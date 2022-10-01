@@ -47,4 +47,3 @@ see LICENSE.md
 
 ### Authors of media (textures)
 All textures: paramat (CC BY-SA 3.0)
-
