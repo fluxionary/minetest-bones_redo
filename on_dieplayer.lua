@@ -46,6 +46,7 @@ function api.on_dieplayer(player)
 		local success
 		if bones_pos then
 			success = api.place_bones_node(player, bones_pos)
+
 		else
 			success = api.place_bones_entity(player, death_pos)
 		end

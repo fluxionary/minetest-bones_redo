@@ -34,7 +34,7 @@ end
 function api.is_owner(pos, name)
 	local player = minetest.get_player_by_name(name)
 
-	if not (player and minetest.is_player(player) and player:get_hp() > 0) then
+	if not player:get_hp() > 0 then
 		return false
 	end
 
@@ -42,8 +42,8 @@ function api.is_owner(pos, name)
 
 	return (
 		owner == "" or
-			owner == name or
-			minetest.check_player_privs(name, "protection_bypass")
+		owner == name or
+		minetest.check_player_privs(name, "protection_bypass")
 	)
 end
 
@@ -130,6 +130,7 @@ function api.collect_stacks_for_bones(player)
 		local inv
 		if list_name == "armor" then
 			inv = get_armor_inv(player_name)
+
 		else
 			inv = player_inv
 		end
