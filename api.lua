@@ -22,6 +22,8 @@ local player_position_message = settings.position_message
 local staff_position_message = settings.staff_position_message
 local ground_search_distance = settings.ground_search_distance
 local bone_node_timeout = settings.bone_node_timeout
+local bones_mode = settings.mode
+local mode_protected = settings.mode_protected
 
 local y1 = vector.new(0, 1, 0)
 
@@ -325,6 +327,21 @@ function api.get_last_death_pos(player_name)
 	local pos_string = mod_storage:get(("%s's last death"):format(player_name))
 	if pos_string then
 		return minetest.string_to_pos(pos_string)
+	end
+end
+
+function api.get_mode_for_player(player_name, death_pos)
+	if not bones.enable_bones then
+		return "keep"
+
+	elseif minetest.is_creative_enabled(player_name) then
+		return "keep"
+
+	elseif minetest.is_protected(death_pos, player_name) then
+		return mode_protected
+
+	else
+		return bones_mode
 	end
 end
 
