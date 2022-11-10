@@ -72,23 +72,23 @@ minetest.register_node("bones:bones", {
 		local node_inv = node_meta:get_inventory()
 
 		if node_inv:is_empty("main") then
-			-- weird check for a "placed" (not "dropped") bones node
+			-- check for a "placed" (not "dropped on death") bones node
 			return
 		end
 
+		local spos = minetest.pos_to_string(pos)
+		local infotext = futil.strip_translation(node_meta:get_string("infotext"))
 		local player_inv = player:get_inventory()
 
 		for i = 1, node_inv:get_size("main") do
 			local stack = node_inv:get_stack("main", i)
-			local before = ItemStack(stack)
 			local remainder = player_inv:add_item("main", stack)
+
+			stack:take_item(remainder:get_count())
 			node_inv:set_stack("main", i, remainder)
 
-			local taken = before:take_item(remainder:get_count())
-			if not taken:is_empty() then
-				bones.log("action", "%s takes %s from bones @ %s",
-					player:get_player_name(), stack:to_string(), minetest.pos_to_string(pos)
-				)
+			if not stack:is_empty() then
+				bones.log("action", "%s takes %s from %s node @ %s", player_name, stack:to_string(), infotext, spos)
 			end
 		end
 
@@ -97,11 +97,16 @@ minetest.register_node("bones:bones", {
 			if not (api.is_owner(pos, player_name) and api.is_timed_out(player)) then
 				local remainder = player_inv:add_item("main", {name = "bones:bones"})
 
-				if not remainder:is_empty() then
+				if remainder:is_empty() then
+					bones.log("action", "%s gets bones:bones from %s node @ %s", player_name, infotext, spos)
+
+				else
 					minetest.add_item(pos, remainder)
+					bones.log("action", "bones:bones item dropped @ %s", spos)
 				end
 			end
 
+			bones.log("action", "removing %s node @ %s", infotext, spos)
 			minetest.remove_node(pos)
 		end
 	end,

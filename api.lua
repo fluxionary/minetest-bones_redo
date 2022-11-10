@@ -17,7 +17,7 @@ local is_inside_world_bounds = futil.is_inside_world_bounds
 
 local lists_to_bones = settings.lists_to_bones
 local share_after = settings.share_after
-local share_after_protected = settings.share_after_protected or share_after * (3/4)
+local share_after_protected = settings.share_after_protected
 local player_position_message = settings.position_message
 local staff_position_message = settings.staff_position_message
 local ground_search_distance = settings.ground_search_distance
@@ -33,6 +33,10 @@ function api.toggle_enabled()
 	bones.enable_bones = not bones.enable_bones
 end
 
+function api.get_owner(pos)
+	return minetest.get_meta(pos):get("owner")
+end
+
 function api.is_owner(pos, name)
 	local player = minetest.get_player_by_name(name)
 
@@ -40,10 +44,10 @@ function api.is_owner(pos, name)
 		return false
 	end
 
-	local owner = minetest.get_meta(pos):get_string("owner")
+	local owner = api.get_owner(pos)
 
 	return (
-		owner == "" or
+		(not owner) or
 		owner == name or
 		minetest.check_player_privs(name, "protection_bypass")
 	)
@@ -102,6 +106,10 @@ function api.find_place_for_bones(player, death_pos, radius)
 		end
 	end
 
+	if #possible_bones_pos == 0 then
+		return
+	end
+
 	table.sort(possible_bones_pos, function(k1, k2)
 		if k1.can_place_below and not k2.can_place_below then
 			return false
@@ -119,7 +127,10 @@ function api.find_place_for_bones(player, death_pos, radius)
 		end
 	end
 
-	return possible_bones_pos[1]
+	local possible_pos = possible_bones_pos[1]
+	if possible_pos then
+		return possible_pos.pos
+	end
 end
 
 -- also clears inventories

@@ -19,3 +19,7 @@ bones.settings = {
 
 	bone_node_timeout = tonumber(s:get("bones.bone_node_timeout")) or 3600,
 }
+
+if not bones.settings.share_after_protected then
+	bones.settings.share_after_protected = bones.settings.share_after * 3 / 4
+end

@@ -94,8 +94,8 @@ minetest.register_entity("bones:bones", {
 		local props = self.object:get_properties()
 
 		if self._old then
-			props.infotext = S("@1's bones", self._owner)
-			props.nametag = S("@1's bones", self._owner)
+			props.infotext = S("@1's old bones", self._owner)
+			props.nametag = S("@1's old bones", self._owner)
 
 		else
 			props.infotext = S("@1's fresh bones", self._owner)
@@ -135,20 +135,22 @@ minetest.register_entity("bones:bones", {
 			return
 		end
 
+		local obj = self.object
+
+		local spos = minetest.pos_to_string(pos)
+		local infotext = futil.strip_translation(obj:get_properties().infotext)
 		local bones_inv = self._inv
 		local player_inv = puncher:get_inventory()
 
 		for i = 1, bones_inv:get_size("main") do
 			local stack = bones_inv:get_stack("main", i)
-			local before = ItemStack(stack)
 			local remainder = player_inv:add_item("main", stack)
+
+			stack:take_item(remainder:get_count())
 			bones_inv:set_stack("main", i, remainder)
 
-			local taken = before:take_item(remainder:get_count())
-			if not taken:is_empty() then
-				bones.log("action", "%s takes %s from bones @ %s",
-					player_name, stack:to_string(), minetest.pos_to_string(pos)
-				)
+			if not stack:is_empty() then
+				bones.log("action", "%s takes %s from %s entity @ %s", player_name, stack:to_string(), infotext, spos)
 			end
 		end
 
@@ -157,11 +159,16 @@ minetest.register_entity("bones:bones", {
 			if not (is_owner(self, player_name) and api.is_timed_out(puncher)) then
 				local remainder = player_inv:add_item("main", {name = "bones:bones"})
 
-				if not remainder:is_empty() then
+				if remainder:is_empty() then
+					bones.log("action", "%s gets bones:bones from %s entity @ %s", player_name, infotext, spos)
+
+				else
 					minetest.add_item(pos, remainder)
+					bones.log("action", "bones:bones item dropped @ %s", spos)
 				end
 			end
 
+			bones.log("action", "removing %s entity @ %s", infotext, spos)
 			self.object:remove()
 		end
 
