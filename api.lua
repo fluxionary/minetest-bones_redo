@@ -72,7 +72,11 @@ function api.is_owner(pos, name)
 
 	local owner = api.get_owner(pos)
 
-	return ((not owner) or owner == name or minetest.check_player_privs(name, "protection_bypass"))
+	return (
+		(not owner) or
+		owner == name or
+		minetest.check_player_privs(name, "protection_bypass")
+	)
 end
 
 function api.may_replace(pos, player)
