@@ -10,10 +10,10 @@ minetest.register_node("bones:bones", {
 		"bones_side.png",
 		"bones_side.png",
 		"bones_rear.png",
-		"bones_front.png"
+		"bones_front.png",
 	},
 	paramtype2 = "facedir",
-	groups = {dig_immediate = 2},
+	groups = { dig_immediate = 2 },
 	is_ground_content = false,
 	sounds = bones.resources.sounds.bones,
 
@@ -40,9 +40,7 @@ minetest.register_node("bones:bones", {
 
 	on_metadata_inventory_take = function(pos, listname, index, stack, player)
 		local player_name = player:get_player_name()
-		bones.log("action", "%s takes %s from bones @ %s",
-			player_name, stack:to_string(), minetest.pos_to_string(pos)
-		)
+		bones.log("action", "%s takes %s from bones @ %s", player_name, stack:to_string(), minetest.pos_to_string(pos))
 
 		local meta = minetest.get_meta(pos)
 		local node_inv = meta:get_inventory()
@@ -50,7 +48,7 @@ minetest.register_node("bones:bones", {
 		if node_inv:is_empty("main") then
 			if not (api.is_owner(pos, player_name) and api.is_timed_out(player)) then
 				local player_inv = player:get_inventory()
-				local remainder = player_inv:add_item("main", {name = "bones:bones"})
+				local remainder = player_inv:add_item("main", { name = "bones:bones" })
 
 				if not remainder:is_empty() then
 					minetest.add_item(pos, remainder)
@@ -95,11 +93,10 @@ minetest.register_node("bones:bones", {
 		-- remove bones if player emptied them
 		if node_inv:is_empty("main") then
 			if not (api.is_owner(pos, player_name) and api.is_timed_out(player)) then
-				local remainder = player_inv:add_item("main", {name = "bones:bones"})
+				local remainder = player_inv:add_item("main", { name = "bones:bones" })
 
 				if remainder:is_empty() then
 					bones.log("action", "%s gets bones:bones from %s node @ %s", player_name, infotext, spos)
-
 				else
 					minetest.add_item(pos, remainder)
 					bones.log("action", "bones:bones item dropped @ %s", spos)

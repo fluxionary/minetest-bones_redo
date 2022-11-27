@@ -1,4 +1,3 @@
-
 bones.formspec = {
 	node_spec = [[
 		size[8,10.5]

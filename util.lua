@@ -10,12 +10,17 @@ function util.drop(itemstack, dropper, pos)
 
 	minetest.item_drop(itemstack, dropper, pos)
 
-	bones.log("action", "%s dropped %s at %s",
-		dropper:get_player_name(), itemstack:to_string(), minetest.pos_to_string(pos))
+	bones.log(
+		"action",
+		"%s dropped %s at %s",
+		dropper:get_player_name(),
+		itemstack:to_string(),
+		minetest.pos_to_string(pos)
+	)
 end
 
 function util.get_armor_inv(player_name)
-	local armor_inv = minetest.get_inventory({type = "detached", name = player_name .. "_armor"})
+	local armor_inv = minetest.get_inventory({ type = "detached", name = player_name .. "_armor" })
 	if armor_inv then
 		return armor_inv
 	end

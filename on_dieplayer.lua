@@ -15,7 +15,7 @@ function api.on_dieplayer(player)
 
 	local player_name = player:get_player_name()
 
-	if (not player_name) or player_name == "" then
+	if not player_name or player_name == "" then
 		bones.log("error", "player has no name? %q", dump(player))
 		return
 	end
@@ -43,7 +43,6 @@ function api.on_dieplayer(player)
 		local success
 		if bones_pos then
 			success = api.place_bones_node(player, bones_pos)
-
 		else
 			success = api.place_bones_entity(player, death_pos)
 		end

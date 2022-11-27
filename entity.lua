@@ -14,8 +14,8 @@ end
 
 minetest.register_entity("bones:bones", {
 	initial_properties = {
-		collisionbox = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
-		selectionbox = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+		collisionbox = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
+		selectionbox = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
 		physical = true,
 		pointable = true,
 		visual = "cube",
@@ -25,7 +25,7 @@ minetest.register_entity("bones:bones", {
 			"bones_side.png",
 			"bones_side.png",
 			"bones_rear.png",
-			"bones_front.png"
+			"bones_front.png",
 		},
 		nametag = S("Bones"),
 		infotext = S("Bones"),
@@ -36,7 +36,7 @@ minetest.register_entity("bones:bones", {
 			becomes_old = self._becomes_old,
 			owner = self._owner,
 			old = self._old,
-			serialized_inv = serialize_invlist(self._inv, "main")
+			serialized_inv = serialize_invlist(self._inv, "main"),
 		})
 	end,
 
@@ -44,7 +44,7 @@ minetest.register_entity("bones:bones", {
 		local pos = self.object:get_pos()
 		local data = minetest.parse_json(staticdata)
 
-		self.object:set_armor_groups({immortal = 1})
+		self.object:set_armor_groups({ immortal = 1 })
 
 		self._becomes_old = data.becomes_old
 		self._owner = data.owner
@@ -70,14 +70,18 @@ minetest.register_entity("bones:bones", {
 
 			on_take = function(inv, listname, index, stack, player)
 				local player_name = player:get_player_name()
-				bones.log("action", "%s takes %s from bones entity @ %s",
-					player_name, stack:to_string(), minetest.pos_to_string(pos)
+				bones.log(
+					"action",
+					"%s takes %s from bones entity @ %s",
+					player_name,
+					stack:to_string(),
+					minetest.pos_to_string(pos)
 				)
 
 				if inv:is_empty("main") then
 					if not (is_owner(self, player_name) and api.is_timed_out(player)) then
 						local player_inv = player:get_inventory()
-						local remainder = player_inv:add_item("main", {name = "bones:bones"})
+						local remainder = player_inv:add_item("main", { name = "bones:bones" })
 
 						if not remainder:is_empty() then
 							minetest.add_item(pos, remainder)
@@ -96,7 +100,6 @@ minetest.register_entity("bones:bones", {
 		if self._old then
 			props.infotext = S("@1's old bones", self._owner)
 			props.nametag = S("@1's old bones", self._owner)
-
 		else
 			props.infotext = S("@1's fresh bones", self._owner)
 			props.nametag = S("@1's fresh bones", self._owner)
@@ -110,8 +113,10 @@ minetest.register_entity("bones:bones", {
 		local inv = self._inv
 
 		if removal and inv and not inv:is_empty("main") then
-			bones.log("warning",
-				"unloading entity w/ non-empty inventory. dropping nodes, which will probably disappear.")
+			bones.log(
+				"warning",
+				"unloading entity w/ non-empty inventory. dropping nodes, which will probably disappear."
+			)
 			for _, stack in ipairs(inv:get_list("main")) do
 				if not stack:is_empty() then
 					bones.log("warning", "dropping %s @ %s", stack:to_string(), minetest.pos_to_string(pos))
@@ -157,11 +162,10 @@ minetest.register_entity("bones:bones", {
 		-- remove bones if player emptied them
 		if bones_inv:is_empty("main") then
 			if not (is_owner(self, player_name) and api.is_timed_out(puncher)) then
-				local remainder = player_inv:add_item("main", {name = "bones:bones"})
+				local remainder = player_inv:add_item("main", { name = "bones:bones" })
 
 				if remainder:is_empty() then
 					bones.log("action", "%s gets bones:bones from %s entity @ %s", player_name, infotext, spos)
-
 				else
 					minetest.add_item(pos, remainder)
 					bones.log("action", "bones:bones item dropped @ %s", spos)
@@ -171,7 +175,6 @@ minetest.register_entity("bones:bones", {
 			bones.log("action", "removing %s entity @ %s", infotext, spos)
 			self.object:remove()
 		end
-
 	end,
 
 	on_rightclick = function(self, clicker)

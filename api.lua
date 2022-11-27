@@ -46,11 +46,7 @@ function api.is_owner(pos, name)
 
 	local owner = api.get_owner(pos)
 
-	return (
-		(not owner) or
-		owner == name or
-		minetest.check_player_privs(name, "protection_bypass")
-	)
+	return (not owner or owner == name or minetest.check_player_privs(name, "protection_bypass"))
 end
 
 function api.may_replace(pos, player)
@@ -114,7 +110,6 @@ function api.find_place_for_bones(player, death_pos, radius)
 	table.sort(possible_bones_pos, function(k1, k2)
 		if k1.can_place_below and not k2.can_place_below then
 			return false
-
 		elseif not k1.can_place_below and k2.can_place_below then
 			return true
 		end
@@ -144,7 +139,6 @@ function api.collect_stacks_for_bones(player)
 		local inv
 		if list_name == "armor" then
 			inv = get_armor_inv(player_name)
-
 		else
 			inv = player_inv
 		end
@@ -168,7 +162,6 @@ function api.collect_stacks_for_bones(player)
 	return stacks
 end
 
-
 function api.place_bones_node(player, bones_pos)
 	local player_name = player:get_player_name()
 
@@ -176,7 +169,7 @@ function api.place_bones_node(player, bones_pos)
 
 	minetest.set_node(bones_pos, {
 		name = "bones:bones",
-		param2 = minetest.dir_to_facedir(player:get_look_dir())
+		param2 = minetest.dir_to_facedir(player:get_look_dir()),
 	})
 
 	local node_meta = minetest.get_meta(bones_pos)
@@ -201,12 +194,10 @@ function api.place_bones_node(player, bones_pos)
 		node_meta:set_string("infotext", S("@1's fresh bones", player_name))
 		node_meta:set_int("time", 0)
 		minetest.get_node_timer(bones_pos):start(share_after_protected)
-
 	elseif share_after > 0 then
 		node_meta:set_string("infotext", S("@1's fresh bones", player_name))
 		node_meta:set_int("time", 0)
 		minetest.get_node_timer(bones_pos):start(share_after)
-
 	else
 		node_meta:set_string("infotext", S("@1's bones", player_name))
 	end
@@ -221,7 +212,7 @@ function api.place_bones_entity(player, death_pos)
 	local serialized_inv = minetest.write_json(stacks_for_bones)
 
 	if not serialized_inv then
-		error(("error serializing stacks?"))
+		error("error serializing stacks?")
 	end
 
 	local becomes_old
@@ -238,14 +229,20 @@ function api.place_bones_entity(player, death_pos)
 		becomes_old = becomes_old,
 		owner = player_name,
 		old = old,
-		serialized_inv = serialized_inv
+		serialized_inv = serialized_inv,
 	}
 
 	local obj = minetest.add_entity(death_pos, "bones:bones", minetest.write_json(data))
 
 	if obj then
 		for _, stack in ipairs(stacks_for_bones) do
-			bones.log("action", "%s added %s to bones entity @ %s", player_name, stack, minetest.pos_to_string(death_pos))
+			bones.log(
+				"action",
+				"%s added %s to bones entity @ %s",
+				player_name,
+				stack,
+				minetest.pos_to_string(death_pos)
+			)
 		end
 
 		return true
@@ -285,7 +282,7 @@ function api.record_death(player_name, pos, mode)
 	local pos_string = minetest.pos_to_string(pos)
 
 	local death_cache = api.death_cache[player_name] or {}
-	table.insert(death_cache, {pos, mode})
+	table.insert(death_cache, { pos, mode })
 	api.death_cache[player_name] = death_cache
 
 	mod_storage:set_string(("%s's last death"):format(player_name), pos_string)
@@ -294,17 +291,17 @@ function api.record_death(player_name, pos, mode)
 		api.timeouts_by_name[player_name] = (minetest.get_us_time() / 1e6) + bone_node_timeout
 	end
 
-    local text = player_name .. " dies at " .. pos_string
+	local text = player_name .. " dies at " .. pos_string
 
-    if mode == "keep" then
-        text = text .. " and keeps their inventory."
-    elseif mode == "drop" then
-        text = text .. " and drops their inventory."
-    elseif mode == "bones" then
-        text = text .. " and their inventory goes to bones."
-    elseif mode == "none" then
-        text = text .. " and doesn't have any inventory to be dropped."
-    end
+	if mode == "keep" then
+		text = text .. " and keeps their inventory."
+	elseif mode == "drop" then
+		text = text .. " and drops their inventory."
+	elseif mode == "bones" then
+		text = text .. " and their inventory goes to bones."
+	elseif mode == "none" then
+		text = text .. " and doesn't have any inventory to be dropped."
+	end
 
 	bones.log("action", text)
 
@@ -313,7 +310,7 @@ function api.record_death(player_name, pos, mode)
 	end
 
 	if staff_position_message then
-        send_to_staff(text)
+		send_to_staff(text)
 	end
 end
 
@@ -345,13 +342,10 @@ end
 function api.get_mode_for_player(player_name, death_pos)
 	if not bones.enable_bones then
 		return "keep"
-
 	elseif minetest.is_creative_enabled(player_name) then
 		return "keep"
-
 	elseif minetest.is_protected(death_pos, player_name) then
 		return mode_protected
-
 	else
 		return bones_mode
 	end
