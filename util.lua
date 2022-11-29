@@ -1,6 +1,8 @@
+local log = bones.log
+
 local util = {}
 
-local lists_to_bones = bones.settings.lists_to_bones
+local lists_to_bones = bones.settings.lists_to_bones:split()
 local staff_priv = bones.settings.staff_priv
 
 function util.drop(itemstack, dropper, pos)
@@ -10,13 +12,7 @@ function util.drop(itemstack, dropper, pos)
 
 	minetest.item_drop(itemstack, dropper, pos)
 
-	bones.log(
-		"action",
-		"%s dropped %s at %s",
-		dropper:get_player_name(),
-		itemstack:to_string(),
-		minetest.pos_to_string(pos)
-	)
+	log("action", "%s dropped %s at %s", dropper:get_player_name(), itemstack:to_string(), minetest.pos_to_string(pos))
 end
 
 function util.get_armor_inv(player_name)

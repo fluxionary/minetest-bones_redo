@@ -1,5 +1,5 @@
 local S = bones.S
-
+local log = bones.log
 local api = bones.api
 
 minetest.register_node("bones:bones", {
@@ -40,7 +40,7 @@ minetest.register_node("bones:bones", {
 
 	on_metadata_inventory_take = function(pos, listname, index, stack, player)
 		local player_name = player:get_player_name()
-		bones.log("action", "%s takes %s from bones @ %s", player_name, stack:to_string(), minetest.pos_to_string(pos))
+		log("action", "%s takes %s from bones @ %s", player_name, stack:to_string(), minetest.pos_to_string(pos))
 
 		local meta = minetest.get_meta(pos)
 		local node_inv = meta:get_inventory()
@@ -86,7 +86,7 @@ minetest.register_node("bones:bones", {
 			node_inv:set_stack("main", i, remainder)
 
 			if not stack:is_empty() then
-				bones.log("action", "%s takes %s from %s node @ %s", player_name, stack:to_string(), infotext, spos)
+				log("action", "%s takes %s from %s node @ %s", player_name, stack:to_string(), infotext, spos)
 			end
 		end
 
@@ -96,14 +96,14 @@ minetest.register_node("bones:bones", {
 				local remainder = player_inv:add_item("main", { name = "bones:bones" })
 
 				if remainder:is_empty() then
-					bones.log("action", "%s gets bones:bones from %s node @ %s", player_name, infotext, spos)
+					log("action", "%s gets bones:bones from %s node @ %s", player_name, infotext, spos)
 				else
 					minetest.add_item(pos, remainder)
-					bones.log("action", "bones:bones item dropped @ %s", spos)
+					log("action", "bones:bones item dropped @ %s", spos)
 				end
 			end
 
-			bones.log("action", "removing %s node @ %s", infotext, spos)
+			log("action", "removing %s node @ %s", infotext, spos)
 			minetest.remove_node(pos)
 		end
 	end,
@@ -124,6 +124,6 @@ minetest.register_node("bones:bones", {
 	on_blast = function(pos, intensity, blaster)
 		local meta = minetest.get_meta(pos)
 		local owner = meta:get_string("owner")
-		bones.log("action", "%s's bones at %s blasted, nothing dropped.", owner, minetest.pos_to_string(pos))
+		log("action", "%s's bones at %s blasted, nothing dropped.", owner, minetest.pos_to_string(pos))
 	end,
 })

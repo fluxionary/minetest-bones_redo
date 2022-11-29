@@ -1,3 +1,4 @@
+local log = bones.log
 local api = bones.api
 local settings = bones.settings
 local util = bones.util
@@ -9,19 +10,19 @@ local search_distance = settings.search_distance
 
 function api.on_dieplayer(player)
 	if not minetest.is_player(player) then
-		bones.log("error", "non-player died: %q", dump(player))
+		log("error", "non-player died: %q", dump(player))
 		return
 	end
 
 	local player_name = player:get_player_name()
 
 	if not player_name or player_name == "" then
-		bones.log("error", "player has no name? %q", dump(player))
+		log("error", "player has no name? %q", dump(player))
 		return
 	end
 
 	if not player:get_pos() then
-		bones.log("error", "player has no position? %q", dump(player))
+		log("error", "player has no position? %q", dump(player))
 		return
 	end
 

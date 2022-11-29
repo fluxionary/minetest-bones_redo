@@ -1,5 +1,5 @@
 local S = bones.S
-
+local log = bones.log
 local api = bones.api
 local formspec = bones.formspec
 
@@ -70,7 +70,7 @@ minetest.register_entity("bones:bones", {
 
 			on_take = function(inv, listname, index, stack, player)
 				local player_name = player:get_player_name()
-				bones.log(
+				log(
 					"action",
 					"%s takes %s from bones entity @ %s",
 					player_name,
@@ -113,13 +113,10 @@ minetest.register_entity("bones:bones", {
 		local inv = self._inv
 
 		if removal and inv and not inv:is_empty("main") then
-			bones.log(
-				"warning",
-				"unloading entity w/ non-empty inventory. dropping nodes, which will probably disappear."
-			)
+			log("warning", "unloading entity w/ non-empty inventory. dropping nodes, which will probably disappear.")
 			for _, stack in ipairs(inv:get_list("main")) do
 				if not stack:is_empty() then
-					bones.log("warning", "dropping %s @ %s", stack:to_string(), minetest.pos_to_string(pos))
+					log("warning", "dropping %s @ %s", stack:to_string(), minetest.pos_to_string(pos))
 					local obj = minetest.add_item(pos, stack)
 					local ent = obj:get_luaentity()
 					ent.dropped_by = self._owner
@@ -155,7 +152,7 @@ minetest.register_entity("bones:bones", {
 			bones_inv:set_stack("main", i, remainder)
 
 			if not stack:is_empty() then
-				bones.log("action", "%s takes %s from %s entity @ %s", player_name, stack:to_string(), infotext, spos)
+				log("action", "%s takes %s from %s entity @ %s", player_name, stack:to_string(), infotext, spos)
 			end
 		end
 
@@ -165,14 +162,14 @@ minetest.register_entity("bones:bones", {
 				local remainder = player_inv:add_item("main", { name = "bones:bones" })
 
 				if remainder:is_empty() then
-					bones.log("action", "%s gets bones:bones from %s entity @ %s", player_name, infotext, spos)
+					log("action", "%s gets bones:bones from %s entity @ %s", player_name, infotext, spos)
 				else
 					minetest.add_item(pos, remainder)
-					bones.log("action", "bones:bones item dropped @ %s", spos)
+					log("action", "bones:bones item dropped @ %s", spos)
 				end
 			end
 
-			bones.log("action", "removing %s entity @ %s", infotext, spos)
+			log("action", "removing %s entity @ %s", infotext, spos)
 			self.object:remove()
 		end
 	end,
@@ -200,6 +197,6 @@ minetest.register_entity("bones:bones", {
 	on_blast = function(self, damage, blaster)
 		local pos = self.object:get_pos()
 		local owner = self._owner
-		bones.log("action", "%s's bones entity at %s blasted, nothing dropped.", owner, minetest.pos_to_string(pos))
+		log("action", "%s's bones entity at %s blasted, nothing dropped.", owner, minetest.pos_to_string(pos))
 	end,
 })

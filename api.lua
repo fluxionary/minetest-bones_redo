@@ -1,7 +1,7 @@
-local api = {}
+local private_state = ...
+local mod_storage = private_state.mod_storage
 
-local mod_storage = bones.mod_storage
-
+local log = bones.log
 local S = bones.S
 local has = bones.has
 local settings = bones.settings
@@ -15,9 +15,9 @@ local send_to_staff = util.send_to_staff
 local iterate_volume = futil.iterate_volume
 local is_inside_world_bounds = futil.is_inside_world_bounds
 
-local lists_to_bones = settings.lists_to_bones
+local lists_to_bones = settings.lists_to_bones:split()
 local share_after = settings.share_after
-local share_after_protected = settings.share_after_protected
+local share_after_protected = settings.share_after_protected or share_after * 3 / 4
 local player_position_message = settings.position_message
 local staff_position_message = settings.staff_position_message
 local ground_search_distance = settings.ground_search_distance
@@ -28,6 +28,8 @@ local mode_protected = settings.mode_protected
 local y1 = vector.new(0, 1, 0)
 
 bones.enable_bones = true
+
+local api = {}
 
 function api.toggle_enabled()
 	bones.enable_bones = not bones.enable_bones
@@ -181,7 +183,7 @@ function api.place_bones_node(player, bones_pos)
 	for _, stack in ipairs(stacks_for_bones) do
 		local remainder = node_inv:add_item("main", stack)
 		if remainder:is_empty() then
-			bones.log("action", "%s added %s to bones @ %s", player_name, stack, pos_string)
+			log("action", "%s added %s to bones @ %s", player_name, stack, pos_string)
 		else
 			drop(remainder, player, bones_pos)
 		end
@@ -236,13 +238,7 @@ function api.place_bones_entity(player, death_pos)
 
 	if obj then
 		for _, stack in ipairs(stacks_for_bones) do
-			bones.log(
-				"action",
-				"%s added %s to bones entity @ %s",
-				player_name,
-				stack,
-				minetest.pos_to_string(death_pos)
-			)
+			log("action", "%s added %s to bones entity @ %s", player_name, stack, minetest.pos_to_string(death_pos))
 		end
 
 		return true
@@ -303,7 +299,7 @@ function api.record_death(player_name, pos, mode)
 		text = text .. " and doesn't have any inventory to be dropped."
 	end
 
-	bones.log("action", text)
+	log("action", text)
 
 	if player_position_message then
 		minetest.chat_send_player(player_name, S("@1 died at @2.", player_name, pos_string))
