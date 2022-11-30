@@ -1,8 +1,8 @@
 # seconds after which a player's bones become public in an unprotected area
-bones.share_after (share bones after (unprotected)) int 1200 0 65535
+bones.share_after (share bones after - unprotected) int 1200 0 65535
 
 # seconds after which a player's bones become public in a protected area
-bones.share_after_protected (share bones after (protected)) int 900 0 65535
+bones.share_after_protected (share bones after - protected) int 900 0 65535
 
 # keep = stays in inventory; drop = items drop on ground; bones = create bones node/entity; bones_entity = always entity
 bones.mode (bones mode in unprotected areas) enum bones keep,drop,bones,bones_entity
