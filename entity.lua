@@ -100,7 +100,6 @@ minetest.register_entity("bones:bones", {
 		if self._old then
 			props.infotext = S("@1's old bones", self._owner)
 			props.nametag = S("@1's old bones", self._owner)
-
 		else
 			props.infotext = S("@1's fresh bones", self._owner)
 			props.nametag = S("@1's fresh bones", self._owner)
