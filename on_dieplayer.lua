@@ -1,9 +1,6 @@
 local log = bones.log
 local api = bones.api
 local settings = bones.settings
-local util = bones.util
-
-local are_inventories_empty = util.are_inventories_empty
 
 local keep_on_failure = settings.keep_on_failure
 local search_distance = settings.search_distance
@@ -34,7 +31,7 @@ function api.on_dieplayer(player)
 		return
 	end
 
-	if are_inventories_empty(player) then
+	if api.are_inventories_empty(player) then
 		api.record_death(player_name, death_pos, "none")
 		return
 	end

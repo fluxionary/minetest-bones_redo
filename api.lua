@@ -1,15 +1,15 @@
 local private_state = ...
 local mod_storage = private_state.mod_storage
 
+local f = string.format
+
 local log = bones.log
 local S = bones.S
-local has = bones.has
 local settings = bones.settings
 local util = bones.util
 
 local can_see = util.can_see
 local drop = util.drop
-local get_armor_inv = util.get_armor_inv
 local send_to_staff = util.send_to_staff
 
 local iterate_volume = futil.iterate_volume
@@ -29,10 +29,34 @@ local y1 = vector.new(0, 1, 0)
 
 bones.enable_bones = true
 
+local function last_death_key(player_name)
+	return f("%s's last death", player_name)
+end
+
 local api = {}
 
 function api.toggle_enabled()
 	bones.enable_bones = not bones.enable_bones
+end
+
+function api.get_inventory(player, list_name)
+	return player:get_inventory()
+end
+
+function api.are_inventories_empty(player)
+	if not minetest.is_player(player) then
+		return true
+	end
+
+	for _, list_name in ipairs(lists_to_bones) do
+		local inv = api.get_inventory(player, list_name)
+
+		if inv and not inv:is_empty(list_name) then
+			return false
+		end
+	end
+
+	return true
 end
 
 function api.get_owner(pos)
@@ -131,37 +155,32 @@ function api.find_place_for_bones(player, death_pos, radius)
 	end
 end
 
--- also clears inventories
 function api.collect_stacks_for_bones(player)
-	local player_inv = player:get_inventory()
-	local player_name = player:get_player_name()
-
 	local stacks = {}
+
 	for _, list_name in ipairs(lists_to_bones) do
-		local inv
-		if list_name == "armor" then
-			inv = get_armor_inv(player_name)
-		else
-			inv = player_inv
+		local inv = api.get_inventory(player, list_name)
+		local list = inv:get_list(list_name)
+		if not list then
+			error(f("inventory %s doesn't exist", list_name))
 		end
 
-		for _, stack in ipairs(inv:get_list(list_name)) do
+		for _, stack in ipairs(list) do
 			if not stack:is_empty() then
 				table.insert(stacks, stack:to_string())
-			end
-		end
-
-		inv:set_list(list_name, {})
-
-		if list_name == "armor" then
-			if has.armor_3d then
-				armor:save_armor_inventory(player)
-				armor:set_player_armor(player)
 			end
 		end
 	end
 
 	return stacks
+end
+
+function api.clear_inventories_in_bones(player)
+	-- only clear *after* we've collected everything, in case of an
+	for _, list_name in ipairs(lists_to_bones) do
+		local inv = api.get_inventory(player, list_name)
+		inv:set_list(list_name, {})
+	end
 end
 
 function api.place_bones_node(player, bones_pos)
@@ -204,6 +223,8 @@ function api.place_bones_node(player, bones_pos)
 		node_meta:set_string("infotext", S("@1's bones", player_name))
 	end
 
+	api.clear_inventories_in_bones(player)
+
 	return true
 end
 
@@ -241,6 +262,8 @@ function api.place_bones_entity(player, death_pos)
 			log("action", "%s added %s to bones entity @ %s", player_name, stack, minetest.pos_to_string(death_pos))
 		end
 
+		api.clear_inventories_in_bones(player)
+
 		return true
 	end
 
@@ -251,6 +274,8 @@ function api.drop_inventory(player, death_pos)
 	for _, stack in ipairs(api.collect_stacks_for_bones(player)) do
 		drop(stack, player, death_pos)
 	end
+
+	api.clear_inventories_in_bones(player)
 
 	drop(ItemStack("bones:bones"), player, death_pos)
 end
@@ -281,7 +306,7 @@ function api.record_death(player_name, pos, mode)
 	table.insert(death_cache, { pos, mode })
 	api.death_cache[player_name] = death_cache
 
-	mod_storage:set_string(("%s's last death"):format(player_name), pos_string)
+	mod_storage:set_string(last_death_key(player_name), pos_string)
 
 	if not api.timeouts_by_name[player_name] then
 		api.timeouts_by_name[player_name] = (minetest.get_us_time() / 1e6) + bone_node_timeout
@@ -329,7 +354,7 @@ function api.is_timed_out(player)
 end
 
 function api.get_last_death_pos(player_name)
-	local pos_string = mod_storage:get(("%s's last death"):format(player_name))
+	local pos_string = mod_storage:get(last_death_key(player_name))
 	if pos_string then
 		return minetest.string_to_pos(pos_string)
 	end
