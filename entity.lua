@@ -198,5 +198,6 @@ minetest.register_entity("bones:bones", {
 		local pos = self.object:get_pos()
 		local owner = self._owner
 		log("action", "%s's bones entity at %s blasted, nothing dropped.", owner, minetest.pos_to_string(pos))
+		return false, false, {}
 	end,
 })
