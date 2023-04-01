@@ -66,7 +66,7 @@ end
 function api.is_owner(pos, name)
 	local player = minetest.get_player_by_name(name)
 
-	if player:get_hp() == 0 then
+	if not player or player:get_hp() == 0 then
 		return false
 	end
 
