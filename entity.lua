@@ -143,6 +143,7 @@ minetest.register_entity("bones:bones", {
 		local infotext = futil.strip_translation(obj:get_properties().infotext)
 		local bones_inv = self._inv
 		local player_inv = puncher:get_inventory()
+		local items_taken = false
 
 		for i = 1, bones_inv:get_size("main") do
 			local stack = bones_inv:get_stack("main", i)
@@ -152,7 +153,16 @@ minetest.register_entity("bones:bones", {
 			bones_inv:set_stack("main", i, remainder)
 
 			if not stack:is_empty() then
+				items_taken = true
 				log("action", "%s takes %s from %s entity @ %s", player_name, stack:to_string(), infotext, spos)
+			end
+		end
+
+		if items_taken then
+			if player_name == self._owner then
+				bones.chat_send_player(player_name, "you remove items from your bones")
+			else
+				bones.chat_send_player(player_name, "you remove items from @1's bones", self._owner)
 			end
 		end
 
