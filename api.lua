@@ -16,6 +16,14 @@ local iterate_volume = futil.iterate_volume
 local is_inside_world_bounds = futil.is_inside_world_bounds
 
 local lists_to_bones = settings.lists_to_bones:split()
+if not (bones.has["3d_armor"] or bones.has["armor"]) then
+	for i = #lists_to_bones, 1, -1 do
+		if lists_to_bones[i] == "armor" then
+			table.remove(lists_to_bones, i)
+		end
+	end
+end
+
 local share_after = settings.share_after
 local share_after_protected = settings.share_after_protected or share_after * 3 / 4
 local player_position_message = settings.position_message
