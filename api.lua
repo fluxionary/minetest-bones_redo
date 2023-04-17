@@ -47,6 +47,7 @@ function api.toggle_enabled()
 	bones.enable_bones = not bones.enable_bones
 end
 
+-- overridden by e.g. 3d_armor
 function api.get_inventory(player, list_name)
 	return player:get_inventory()
 end
@@ -65,6 +66,21 @@ function api.are_inventories_empty(player)
 	end
 
 	return true
+end
+
+function api.get_source(pos)
+	local meta = minetest.get_meta(pos)
+	local source = meta:get("source") or meta:get("owner")
+	if source then
+		return source
+	end
+	-- hax
+	local infotext = meta:get("infotext")
+	if infotext then
+		infotext = futil.strip_translation(infotext)
+		source = infotext:match("^(.*)'s ")
+		return source
+	end
 end
 
 function api.get_owner(pos)
@@ -218,6 +234,7 @@ function api.place_bones_node(player, bones_pos)
 
 	node_meta:set_string("formspec", bones.formspec.node_spec)
 	node_meta:set_string("owner", player_name)
+	node_meta:set_string("source", player_name)
 
 	if minetest.is_protected(bones_pos, player_name) and share_after_protected > 0 then
 		node_meta:set_string("infotext", S("@1's fresh bones", player_name))
@@ -343,6 +360,7 @@ function api.record_death(player_name, pos, mode)
 	end
 end
 
+--if a player is timed out, they can't get another bones node from their own bones
 function api.is_timed_out(player)
 	local player_name = player:get_player_name()
 	local timeout = api.timeouts_by_name[player_name]

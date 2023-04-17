@@ -77,6 +77,7 @@ minetest.register_node("bones:bones", {
 		local spos = minetest.pos_to_string(pos)
 		local infotext = futil.strip_translation(node_meta:get_string("infotext"))
 		local player_inv = player:get_inventory()
+		local items_taken = false
 
 		for i = 1, node_inv:get_size("main") do
 			local stack = node_inv:get_stack("main", i)
@@ -86,7 +87,19 @@ minetest.register_node("bones:bones", {
 			node_inv:set_stack("main", i, remainder)
 
 			if not stack:is_empty() then
+				items_taken = true
 				log("action", "%s takes %s from %s node @ %s", player_name, stack:to_string(), infotext, spos)
+			end
+		end
+
+		if items_taken then
+			local source = api.get_source(pos)
+			if player_name == source then
+				bones.chat_send_player(player_name, "you remove items from your bones")
+			elseif source then
+				bones.chat_send_player(player_name, "you remove items from @1's bones", source)
+			else
+				bones.chat_send_player(player_name, "you remove items from the bones")
 			end
 		end
 
