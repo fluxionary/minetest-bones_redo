@@ -26,6 +26,46 @@ local bones_mode = settings.mode
 local mode_protected = settings.mode_protected
 
 local y1 = vector.new(0, 1, 0)
+local handlers = (function()
+	local r = {}
+
+	for _, method in ipairs({
+		"collect_items",
+		"empty_inventories",
+		"post_action",
+	}) do
+		r[method] = function(self, ...)
+			for _, handler in ipairs(self) do
+				local fun = handler[method]
+
+				if fun then
+					fun(handler, ...)
+				end
+			end
+		end
+	end
+
+	r.is_empty = function(self, ...)
+		for _, handler in ipairs(self) do
+			local is_empty = handler.is_empty
+
+			if is_empty then
+				if not is_empty(handler, ...) then
+					return false
+				end
+			end
+		end
+
+		return true
+	end
+
+	r.register = function(self, def)
+		table.insert(self, def)
+		minetest.log("[bones_redo] registered handler " .. (def.name or "(unknown)"))
+	end
+
+	return r
+end)()
 
 bones.enable_bones = true
 
@@ -39,24 +79,18 @@ function api.toggle_enabled()
 	bones.enable_bones = not bones.enable_bones
 end
 
-function api.get_inventory(player, list_name)
-	return player:get_inventory()
+-- factory function takes a playerref and returns an iterator over inventory lists
+function api.register_handler(def)
+	handlers:register(def)
 end
+
 
 function api.are_inventories_empty(player)
 	if not minetest.is_player(player) then
 		return true
 	end
 
-	for _, list_name in ipairs(lists_to_bones) do
-		local inv = api.get_inventory(player, list_name)
-
-		if inv and not inv:is_empty(list_name) then
-			return false
-		end
-	end
-
-	return true
+	return handlers:is_empty(player)
 end
 
 function api.get_owner(pos)
@@ -158,29 +192,22 @@ end
 function api.collect_stacks_for_bones(player)
 	local stacks = {}
 
-	for _, list_name in ipairs(lists_to_bones) do
-		local inv = api.get_inventory(player, list_name)
-		local list = inv:get_list(list_name)
-		if not list then
-			error(f("inventory %s doesn't exist", list_name))
-		end
-
-		for _, stack in ipairs(list) do
-			if not stack:is_empty() then
-				table.insert(stacks, stack:to_string())
-			end
+	local function add_item(item)
+		if not item:is_empty() then
+			table.insert(stacks, item)
 		end
 	end
+
+	handlers:collect_items(player, add_item)
 
 	return stacks
 end
 
 function api.clear_inventories_in_bones(player)
 	-- only clear *after* we've collected everything, in case of an
-	for _, list_name in ipairs(lists_to_bones) do
-		local inv = api.get_inventory(player, list_name)
-		inv:set_list(list_name, {})
-	end
+	handlers:empty_inventories(player)
+
+	handlers:post_action(player)
 end
 
 function api.place_bones_node(player, bones_pos)
