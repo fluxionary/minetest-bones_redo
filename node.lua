@@ -95,11 +95,11 @@ minetest.register_node("bones:bones", {
 		if items_taken then
 			local source = api.get_source(pos)
 			if player_name == source then
-				bones.chat_send_player(player_name, "you remove items from your bones")
+				bones.chat_send_player(player_name, "you remove items from your bones @@@1", spos)
 			elseif source then
-				bones.chat_send_player(player_name, "you remove items from @1's bones", source)
+				bones.chat_send_player(player_name, "you remove items from @1's bones @@@1", source, spos)
 			else
-				bones.chat_send_player(player_name, "you remove items from the bones")
+				bones.chat_send_player(player_name, "you remove items from the bones @@@1", spos)
 			end
 		end
 
