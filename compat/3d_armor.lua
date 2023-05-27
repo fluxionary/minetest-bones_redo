@@ -4,12 +4,12 @@ end
 
 local old_get_inventory = bones.api.get_inventory
 
-function bones.api.get_inventory(player, list_name)
-	if list_name == "armor" then
+function bones.api.get_inventory(player, listname)
+	if listname == "armor" then
 		local _, inv = armor:get_valid_player(player, "[bones]")
 		return inv
 	else
-		return old_get_inventory(player, list_name)
+		return old_get_inventory(player, listname)
 	end
 end
 

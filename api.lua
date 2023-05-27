@@ -48,7 +48,7 @@ function api.toggle_enabled()
 end
 
 -- overridden by e.g. 3d_armor
-function api.get_inventory(player, list_name)
+function api.get_inventory(player, listname)
 	return player:get_inventory()
 end
 
@@ -57,10 +57,10 @@ function api.are_inventories_empty(player)
 		return true
 	end
 
-	for _, list_name in ipairs(lists_to_bones) do
-		local inv = api.get_inventory(player, list_name)
+	for _, listname in ipairs(lists_to_bones) do
+		local inv = api.get_inventory(player, listname)
 
-		if inv and not inv:is_empty(list_name) then
+		if inv and not inv:is_empty(listname) then
 			return false
 		end
 	end
@@ -182,11 +182,11 @@ end
 function api.collect_stacks_for_bones(player)
 	local stacks = {}
 
-	for _, list_name in ipairs(lists_to_bones) do
-		local inv = api.get_inventory(player, list_name)
-		local list = inv:get_list(list_name)
+	for _, listname in ipairs(lists_to_bones) do
+		local inv = api.get_inventory(player, listname)
+		local list = inv:get_list(listname)
 		if not list then
-			error(f("inventory %s doesn't exist", list_name))
+			error(f("inventory %s doesn't exist", listname))
 		end
 
 		for _, stack in ipairs(list) do
@@ -201,16 +201,18 @@ end
 
 function api.clear_inventories_in_bones(player)
 	-- only clear *after* we've collected everything, in case of an
-	for _, list_name in ipairs(lists_to_bones) do
-		local inv = api.get_inventory(player, list_name)
-		inv:set_list(list_name, {})
+	for _, listname in ipairs(lists_to_bones) do
+		local inv = api.get_inventory(player, listname)
+		inv:set_list(listname, {})
 	end
 end
 
-function api.place_bones_node(player, bones_pos)
-	local player_name = player:get_player_name()
+function api.place_bones_node(player, bones_pos, stacks_for_bones)
+	if not api.may_replace(bones_pos, player) then
+		return false
+	end
 
-	local stacks_for_bones = api.collect_stacks_for_bones(player)
+	local player_name = player:get_player_name()
 
 	minetest.set_node(bones_pos, {
 		name = "bones:bones",
@@ -253,10 +255,8 @@ function api.place_bones_node(player, bones_pos)
 	return true
 end
 
-function api.place_bones_entity(player, death_pos)
+function api.place_bones_entity(player, death_pos, stacks_for_bones)
 	local player_name = player:get_player_name()
-
-	local stacks_for_bones = api.collect_stacks_for_bones(player)
 	local serialized_inv = minetest.write_json(stacks_for_bones)
 
 	if not serialized_inv then

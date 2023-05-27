@@ -38,11 +38,15 @@ function api.on_dieplayer(player)
 
 	if mode == "bones" then
 		local bones_pos = api.find_place_for_bones(player, death_pos, search_distance)
+		local stacks_for_bones = api.collect_stacks_for_bones(player)
 		local success
+
 		if bones_pos then
-			success = api.place_bones_node(player, bones_pos)
-		else
-			success = api.place_bones_entity(player, death_pos)
+			success = api.place_bones_node(player, bones_pos, stacks_for_bones)
+		end
+
+		if not success then
+			success = api.place_bones_entity(player, death_pos, stacks_for_bones)
 		end
 
 		if success then
