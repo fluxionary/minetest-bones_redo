@@ -648,11 +648,18 @@ stds.minetest = {
 stds.bones = {
 	globals = {
 		"bones",
+
+		i3 = {fields = {settings = {fields = {
+            "drop_bag_on_die",
+            "keep_bag_on_die",
+		}}}},
 	},
 	read_globals = {
 		"fmod",
 		"futil",
-		"default",
 		"armor",
+		"default",
+		"i3",
+		"unified_inventory",
 	},
 }

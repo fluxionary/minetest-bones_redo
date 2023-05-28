@@ -28,8 +28,13 @@ bones.search_distance (search distance) int 3 0 65535
 # how far down to look for ground when recording a death
 bones.ground_search_distance (ground search distance) int 128 0 65535
 
-# which inventory lists to put into bones
-bones.lists_to_bones (inventory lists to put in bones) string main,craft,armor
-
-# how long a player has to wait before they can get another bone node from their own bones (0 disables)
+# how long a player has to wait before they can gain another bone node from their own bones.
+# 0 means they can get another node immediately.
 bones.bone_node_timeout (bone node timeout) int 3600 0 86400
+
+# player inventory lists which are put into bones
+bones.lists_to_bones (inventory lists to put in bones) string main,craft
+
+# a list of inventory handlers to disable. by default, any inventory handler which is registered is executed.
+# possible values include unified_inventory, armor, and i3.
+bones.disable_inventory_handlers (which inventory handlers to disable) string i3_bags,unified_inventory_bags

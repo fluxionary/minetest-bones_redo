@@ -15,15 +15,6 @@ local send_to_staff = util.send_to_staff
 local iterate_volume = futil.iterate_volume
 local is_inside_world_bounds = futil.is_inside_world_bounds
 
-local lists_to_bones = settings.lists_to_bones:split()
-if not (bones.has["3d_armor"] or bones.has["armor"]) then
-	for i = #lists_to_bones, 1, -1 do
-		if lists_to_bones[i] == "armor" then
-			table.remove(lists_to_bones, i)
-		end
-	end
-end
-
 local share_after = settings.share_after
 local share_after_protected = settings.share_after_protected or share_after * 3 / 4
 local player_position_message = settings.position_message
@@ -32,6 +23,11 @@ local ground_search_distance = settings.ground_search_distance
 local bone_node_timeout = settings.bone_node_timeout
 local bones_mode = settings.mode
 local mode_protected = settings.mode_protected
+
+local disabled_handlers = {}
+for _, handler in ipairs(bones.settings.disable_inventory_handlers:split()) do
+	disabled_handlers[handler:trim()] = true
+end
 
 local y1 = vector.new(0, 1, 0)
 
@@ -47,9 +43,12 @@ function api.toggle_enabled()
 	bones.enable_bones = not bones.enable_bones
 end
 
--- overridden by e.g. 3d_armor
-function api.get_inventory(player, listname)
-	return player:get_inventory()
+bones.inventory_handlers = {}
+
+function api.register_inventory_handler(name, def)
+	if not disabled_handlers[name] then
+		bones.inventory_handlers[name] = def
+	end
 end
 
 function api.are_inventories_empty(player)
@@ -57,10 +56,8 @@ function api.are_inventories_empty(player)
 		return true
 	end
 
-	for _, listname in ipairs(lists_to_bones) do
-		local inv = api.get_inventory(player, listname)
-
-		if inv and not inv:is_empty(listname) then
+	for _, def in pairs(bones.inventory_handlers) do
+		if def.is_empty and not def.is_empty(player) then
 			return false
 		end
 	end
@@ -68,6 +65,37 @@ function api.are_inventories_empty(player)
 	return true
 end
 
+function api.collect_stacks_for_bones(player)
+	local stacks = {}
+
+	for _, def in pairs(bones.inventory_handlers) do
+		if def.collect_stacks then
+			table.insert_all(stacks, def.collect_stacks(player))
+		end
+	end
+
+	return stacks
+end
+
+function api.clear_inventories_in_bones(player)
+	for _, def in pairs(bones.inventory_handlers) do
+		if def.clear_inventory then
+			def.clear_inventory(player)
+		end
+	end
+end
+
+function api.post_action(player)
+	for _, def in pairs(bones.inventory_handlers) do
+		if def.post_action then
+			def.post_action(player)
+		end
+	end
+end
+
+--[[
+"source" is the player who dropped the bones. tracked separately, because "owner" is removed when bones age.
+]]
 function api.get_source(pos)
 	local meta = minetest.get_meta(pos)
 	local source = meta:get("source") or meta:get("owner")
@@ -96,7 +124,7 @@ function api.is_owner(pos, name)
 
 	local owner = api.get_owner(pos)
 
-	return ((not owner) or owner == name or minetest.check_player_privs(name, "protection_bypass"))
+	return (not owner) or owner == name or minetest.check_player_privs(name, "protection_bypass")
 end
 
 function api.may_replace(pos, player)
@@ -179,34 +207,6 @@ function api.find_place_for_bones(player, death_pos, radius)
 	end
 end
 
-function api.collect_stacks_for_bones(player)
-	local stacks = {}
-
-	for _, listname in ipairs(lists_to_bones) do
-		local inv = api.get_inventory(player, listname)
-		local list = inv:get_list(listname)
-		if not list then
-			error(f("inventory %s doesn't exist", listname))
-		end
-
-		for _, stack in ipairs(list) do
-			if not stack:is_empty() then
-				table.insert(stacks, stack:to_string())
-			end
-		end
-	end
-
-	return stacks
-end
-
-function api.clear_inventories_in_bones(player)
-	-- only clear *after* we've collected everything, in case of an
-	for _, listname in ipairs(lists_to_bones) do
-		local inv = api.get_inventory(player, listname)
-		inv:set_list(listname, {})
-	end
-end
-
 function api.place_bones_node(player, bones_pos, stacks_for_bones)
 	if not api.may_replace(bones_pos, player) then
 		return false
@@ -251,6 +251,7 @@ function api.place_bones_node(player, bones_pos, stacks_for_bones)
 	end
 
 	api.clear_inventories_in_bones(player)
+	api.post_action(player)
 
 	return true
 end
@@ -288,6 +289,7 @@ function api.place_bones_entity(player, death_pos, stacks_for_bones)
 		end
 
 		api.clear_inventories_in_bones(player)
+		api.post_action(player)
 
 		return true
 	end
