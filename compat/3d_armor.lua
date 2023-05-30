@@ -29,17 +29,18 @@ bones.api.register_inventory_handler("armor", {
 		return inv:is_empty("armor")
 	end,
 	collect_stacks = function(player)
-		local stacks = {}
 		local _, inv = armor:get_valid_player(player, "[bones]")
 		if not inv then
-			return stacks
+			return {}
 		end
 
+		local stacks = {}
 		for _, item in ipairs(inv:get_list("armor")) do
 			if not item:is_empty() then
-				stacks[#stacks + 1] = stacks
+				stacks[#stacks + 1] = item
 			end
 		end
+
 		return stacks
 	end,
 	clear_inventory = function(player)

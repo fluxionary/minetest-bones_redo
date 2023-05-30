@@ -16,13 +16,11 @@ bones.api.register_inventory_handler("player_inventory_lists", {
 		local stacks = {}
 		local inv = player:get_inventory()
 		for _, listname in ipairs(lists_to_bones) do
-			local list = inv:get_list(listname)
+			local list = inv:get_list(listname) or {}
 
-			if list then
-				for _, item in ipairs(list) do
-					if not item:is_empty() then
-						stacks[#stacks + 1] = item
-					end
+			for _, item in ipairs(list) do
+				if not item:is_empty() then
+					stacks[#stacks + 1] = item
 				end
 			end
 		end
