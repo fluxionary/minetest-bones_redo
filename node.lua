@@ -97,7 +97,7 @@ minetest.register_node("bones:bones", {
 			if player_name == source then
 				bones.chat_send_player(player_name, "you remove items from your bones @@@1", spos)
 			elseif source then
-				bones.chat_send_player(player_name, "you remove items from @1's bones @@@1", source, spos)
+				bones.chat_send_player(player_name, "you remove items from @1's bones @@@2", source, spos)
 			else
 				bones.chat_send_player(player_name, "you remove items from the bones @@@1", spos)
 			end

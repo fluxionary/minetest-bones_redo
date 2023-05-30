@@ -162,7 +162,7 @@ minetest.register_entity("bones:bones", {
 			if player_name == self._owner then
 				bones.chat_send_player(player_name, "you remove items from your bones @@@1", spos)
 			else
-				bones.chat_send_player(player_name, "you remove items from @1's bones @@@1", self._owner, spos)
+				bones.chat_send_player(player_name, "you remove items from @1's bones @@@2", self._owner, spos)
 			end
 		end
 
