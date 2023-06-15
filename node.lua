@@ -123,14 +123,15 @@ minetest.register_node("bones:bones", {
 
 	on_timer = function(pos, elapsed)
 		local meta = minetest.get_meta(pos)
-		local time = meta:get_int("time") + elapsed
+		local time = os.time()
 		local share_after = meta:get_int("share_after")
 		if time >= share_after then
-			meta:set_string("infotext", S("@1's old bones", meta:get_string("owner")))
+			local owner = meta:get_string("owner")
+			log("action", "%s's bones @ %s become old", owner, minetest.pos_to_string(pos))
+			meta:set_string("infotext", S("@1's old bones", owner))
 			meta:set_string("owner", "")
 		else
-			meta:set_int("time", time)
-			return true
+			minetest.get_node_timer(pos):start(share_after - time + 1)
 		end
 	end,
 

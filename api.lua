@@ -240,11 +240,11 @@ function api.place_bones_node(player, bones_pos, stacks_for_bones)
 
 	if minetest.is_protected(bones_pos, player_name) and share_after_protected > 0 then
 		node_meta:set_string("infotext", S("@1's fresh bones", player_name))
-		node_meta:set_int("time", 0)
+		node_meta:set_int("share_after", os.time() + share_after_protected)
 		minetest.get_node_timer(bones_pos):start(share_after_protected)
 	elseif share_after > 0 then
 		node_meta:set_string("infotext", S("@1's fresh bones", player_name))
-		node_meta:set_int("time", 0)
+		node_meta:set_int("share_after", os.time() + share_after)
 		minetest.get_node_timer(bones_pos):start(share_after)
 	else
 		node_meta:set_string("infotext", S("@1's bones", player_name))
