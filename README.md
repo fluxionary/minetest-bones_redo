@@ -21,7 +21,7 @@ see LICENSE.md
 ### Authors of source code
 * originally by PilzAdam (MIT)
 * various Minetest developers and contributors ?-2022, (MIT)
-* fluxionary 2022 (AGPL)
+* fluxionary 2022 (LGPL)
 
 ### Authors of media (textures)
 all textures: paramat (CC BY-SA 3.0)
