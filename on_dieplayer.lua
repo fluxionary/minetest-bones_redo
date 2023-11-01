@@ -6,7 +6,7 @@ local keep_on_failure = settings.keep_on_failure
 local search_distance = settings.search_distance
 
 function api.on_dieplayer(player)
-	if not minetest.is_player(player) then
+	if not futil.is_player(player) then
 		log("error", "non-player died: %q", dump(player))
 		return
 	end

@@ -52,7 +52,7 @@ function api.register_inventory_handler(name, def)
 end
 
 function api.are_inventories_empty(player)
-	if not minetest.is_player(player) then
+	if not futil.is_player(player) then
 		return true
 	end
 

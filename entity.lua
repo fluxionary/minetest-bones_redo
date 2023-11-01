@@ -185,7 +185,7 @@ minetest.register_entity("bones:bones", {
 	end,
 
 	on_rightclick = function(self, clicker)
-		if not minetest.is_player(clicker) then
+		if not futil.is_player(clicker) then
 			return
 		end
 

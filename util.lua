@@ -31,7 +31,7 @@ end
 function util.send_to_staff(text)
 	local message = minetest.colorize("#98ff98", "[STAFF] " .. text)
 	for _, player in ipairs(minetest.get_connected_players()) do
-		if minetest.is_player(player) and minetest.check_player_privs(player, staff_priv) then
+		if futil.is_player(player) and minetest.check_player_privs(player, staff_priv) then
 			local name = player:get_player_name()
 			minetest.chat_send_player(name, message)
 		end
