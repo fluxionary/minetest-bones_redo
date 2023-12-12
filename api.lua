@@ -257,13 +257,11 @@ function api.place_bones_node(player, bones_pos, stacks_for_bones)
 end
 
 function api.place_bones_entity(player, death_pos, stacks_for_bones)
+	local finv = futil.FakeInventory()
+	finv:set_size("main", #stacks_for_bones)
+	finv:set_list("main", stacks_for_bones)
+	local serialized_inv = futil.serialize_invlist(finv, "main")
 	local player_name = player:get_player_name()
-	local serialized_inv = minetest.write_json(stacks_for_bones)
-
-	if not serialized_inv then
-		error("error serializing stacks?")
-	end
-
 	local becomes_old
 	local old = false
 	if minetest.is_protected(death_pos, player_name) and share_after_protected > 0 then
