@@ -13,6 +13,9 @@ bones.mode_protected (bones mode in protected areas) enum bones keep,drop,bones,
 # if false, items will drop on the ground if creating the bones node/entity fails
 bones.keep_on_failure (drop items on failure) bool true
 
+# if false, the entity will not be physical - it will not collide with other entities or players.
+bones.entity_physical (bones entity is physical) bool true
+
 # shows the death position to the player on death
 bones.position_message (show position message) bool true
 

@@ -1,4 +1,5 @@
 local S = bones.S
+local s = bones.settings
 local log = bones.log
 local api = bones.api
 local formspec = bones.formspec
@@ -16,7 +17,7 @@ minetest.register_entity("bones:bones", {
 	initial_properties = {
 		collisionbox = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
 		selectionbox = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
-		physical = true,
+		physical = s.entity_physical,
 		pointable = true,
 		visual = "cube",
 		textures = {
