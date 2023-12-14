@@ -8,8 +8,6 @@ for _, handler in ipairs(bones.settings.disable_inventory_handlers:split()) do
 	end
 end
 
-i3.settings.drop_bag_on_die = false
-
 assert(
 	type(i3.settings.keep_bag_on_die) ~= "nil",
 	[[
@@ -40,7 +38,7 @@ local function get_bag(player_name)
 	return data, bag, content
 end
 
-bones.api.register_handler("i3_bags", {
+bones.api.register_inventory_handler("i3_bags", {
 	is_empty = function(player)
 		local player_name = player:get_player_name()
 		local data, bag, _ = get_bag(player_name)
@@ -53,7 +51,7 @@ bones.api.register_handler("i3_bags", {
 			return false
 		end
 	end,
-	collect_items = function(player)
+	collect_stacks = function(player)
 		local stacks = {}
 		local player_name = player:get_player_name()
 		local _, bag, _ = get_bag(player_name)
@@ -62,13 +60,13 @@ bones.api.register_handler("i3_bags", {
 
 			for _, item in ipairs(list) do
 				if not item:is_empty() then
-					stacks[#stacks] = item
+					stacks[#stacks + 1] = item
 				end
 			end
 		end
 		return stacks
 	end,
-	empty_inventories = function(player)
+	clear_inventory = function(player)
 		local player_name = player:get_player_name()
 		local data, bag, content = get_bag(player_name)
 		if not data then
