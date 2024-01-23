@@ -219,6 +219,12 @@ function api.place_bones_node(player, bones_pos, stacks_for_bones)
 		param2 = minetest.dir_to_facedir(player:get_look_dir()),
 	})
 
+	-- i've encountered a place where the air node where the bones should have been placed was still air, and the
+	-- items were in that air node's metadata... hopefully this check will prevent that:
+	if minetest.get_node(bones_pos).name ~= "bones:bones" then
+		return false
+	end
+
 	local node_meta = minetest.get_meta(bones_pos)
 	local node_inv = node_meta:get_inventory()
 	node_inv:set_size("main", #stacks_for_bones)
